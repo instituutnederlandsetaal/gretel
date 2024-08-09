@@ -57,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 ROOT_URLCONF = 'gretel.urls'
@@ -86,7 +85,7 @@ WSGI_APPLICATION = 'gretel.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.getenv('DATABASE_PATH', BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -147,6 +146,7 @@ LOGGING = {
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://' + os.getenv('REDIS_HOST', 'localhost')
+CELERY_RESULT_BACKEND = 'redis://' + os.getenv('REDIS_HOST', 'localhost')
 
 # BaseX connection settings - change in production
 BASEX_HOST = os.getenv('BASEX_HOST', 'localhost')

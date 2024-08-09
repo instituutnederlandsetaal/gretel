@@ -28,5 +28,6 @@ js/ts/**
 
 vendor
 !lassy-xpath/.gitignore
+uploaded_treebanks/
 
 __pycache__/

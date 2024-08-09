@@ -1,0 +1,135 @@
+version: "3"
+
+services:
+
+  frontend: 
+    container_name: gretel-frontend
+    image: instituutnederlandsetaal/gretel5-frontend
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+      target: frontend
+    ports: 
+      - 80:80
+
+  backend:
+    profiles: 
+      - production
+      - prod
+      - ""
+    container_name: gretel-backend
+    image: instituutnederlandsetaal/gretel5-backend
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+      target: backend
+    environment: 
+      REDIS_HOST: redis
+      BASEX_HOST: basex
+      ALPINO_HOST: alpino
+      DATABASE_PATH: /app/backend/database/db.sqlite3
+    volumes: 
+      - gretel-database:/app/backend/database/
+      - gretel-uploads:/app/backend/uploaded_treebanks/
+      - gretel-results-cache:/app/backend/query_result_cache/
+    ports: 
+      - 5678:5678
+      - 8000:8000
+    command: bash -c "
+      python manage.py migrate && 
+      python manage.py runserver 0.0.0.0:8000 --pythonpath .."
+
+
+  backend-dev:
+    profiles: 
+      - development
+      - dev
+    container_name: gretel-backend
+    image: instituutnederlandsetaal/gretel5-backend
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+      target: backend
+  
+    environment: 
+      REDIS_HOST: redis
+      BASEX_HOST: basex
+      ALPINO_HOST: alpino
+    ports: 
+      - 5678:5678
+      - 8000:8000
+    volumes: 
+      - ../../backend:/app/backend
+    # need to run migrations (which inits db) because we overwrite the database file with the volume.
+    command: bash -c "
+      python manage.py migrate && 
+      python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --pythonpath .."
+
+  celery: 
+    profiles: 
+      - production
+      - prod
+      - ""
+    container_name: gretel-celery
+    image: instituutnederlandsetaal/gretel5-backend
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+      target: backend
+    # Same env as backend as we are basically a duplicate
+    environment: 
+      REDIS_HOST: redis
+      BASEX_HOST: basex
+      ALPINO_HOST: alpino
+      DATABASE_PATH: /app/backend/database/db.sqlite3
+    volumes: 
+      - gretel-database:/app/backend/database/
+      - gretel-uploads:/app/backend/uploaded_treebanks/
+      - gretel-results-cache:/app/backend/query_result_cache/
+    command: bash -c "python -m celery -A gretel.celery worker -l info"
+
+  celery-dev: 
+    profiles: 
+      - development
+      - dev
+    container_name: gretel-celery
+    image: instituutnederlandsetaal/gretel5-backend
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+      target: backend
+    volumes: 
+      - ../../backend:/app/backend
+    # Same env as backend as we are basically a duplicate
+    environment: 
+      REDIS_HOST: redis
+      BASEX_HOST: basex
+      ALPINO_HOST: alpino
+    ports: 
+      - 5679:5679
+    command: bash -c "python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5679 -m celery -A gretel.celery worker -l info -P solo"
+
+  alpino:
+    container_name: gretel-alpino
+    image: registry.webhosting.rug.nl/compling/alpino:latest
+    environment:
+      - PROLOGMAXSIZE=1500M
+    ports:
+      - 7001:7001
+    command: Alpino -notk -veryfast user_max=600000 server_kind=parse server_port=7001 assume_input_is_tokenized=on debug=0 end_hook=xml -init_dict_p batch_command=alpino_server
+    
+  redis:
+    container_name: gretel-redis
+    image: redis:7-alpine
+
+  basex: 
+    container_name: gretel-basex
+    image: instituutnederlandsetaal/gretel5-basex
+    build: 
+      context: ../..
+      dockerfile: docker/production/Dockerfile.basex
+
+volumes: 
+  gretel-database:
+  gretel-uploads:
+  gretel-results-cache:

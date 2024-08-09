@@ -1,3 +1,17 @@
 .venv
 **/db.sqlite3
 **/node_modules
+
+requirements.txt
+
+docker/production/docker-compose.yml
+docker/production/Dockerfile
+docker/production/Dockerfile.basex
+
+README.md
+
+db.sqlite3
+celerybeat-schedule
+**/uploaded_treebanks
+**/query_result_cache
+**/.angular
