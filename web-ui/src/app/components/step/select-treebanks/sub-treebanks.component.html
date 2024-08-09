@@ -59,7 +59,7 @@
         <tbody *ngIf="(!componentGroups || !variants) else withGroups">
             <tr *ngFor="let c of components | keyvalue" (click)="toggleComponent(c.value)">
                 <!-- TODO move into named template -->
-                <td>
+                <td [attr.colspan]="variants ? variants.length : 1">
                     <label [class]="treebank.multiOption ? 'checkbox' : 'radio'"
                         [attr.disabled]="c.value.disabled || null" (click)="$event.stopPropagation()">
                         <input [type]="treebank.multiOption ? 'checkbox' : 'radio'" [disabled]="c.value.disabled"
@@ -69,6 +69,10 @@
                 </td>
 
                 <td *ngIf="showDescription">{{c.value.description}}</td>
+                <ng-container *ngFor="let variant of (variants || [])">
+                    <td class="is-number">{{c.value.variant === variant.name ? c.value.sentenceCount.toLocaleString() : '—'}}</td>
+                    <td class="is-number" *ngIf="showWordCount">{{c.value.variant === variant.name ? c.value.wordCount.toLocaleString() : '—'}}</td>
+                </ng-container>
                 <td class="is-number">{{c.value.sentenceCount.toLocaleString()}}</td>
                 <td class="is-number" *ngIf="showWordCount">{{c.value.wordCount.toLocaleString()}}</td>
             </tr>

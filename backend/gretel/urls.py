@@ -12,6 +12,8 @@ urlpatterns = [
     path('treebanks/', include('treebanks.urls')),
     path('parse/', include('parse.urls')),
     path('search/', include('search.urls')),
+    path('upload/', include('upload.urls')),
+    
 
     path('mwe/', include('mwe.urls')),
 

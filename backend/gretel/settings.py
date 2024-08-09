@@ -161,6 +161,9 @@ LOGGING = {
     },
 }
 
+# We need to have uploads written to disk in order to unzip them using patool.
+FILE_UPLOAD_MAX_MEMORY_SIZE = 0
+
 # Celery settings
 CELERY_BROKER_URL = 'redis://' + os.getenv('REDIS_HOST', 'localhost')
 CELERY_RESULT_BACKEND = 'redis://' + os.getenv('REDIS_HOST', 'localhost')
@@ -193,6 +196,8 @@ STATICFILES_DIRS: List[str] = []
 PROXY_FRONTEND = None
 
 # Allauth settings
+REGISTRATION_ENABLED = os.getenv('REGISTRATION_ENABLED', 'false').lower() in ('true', '1', 'yes')
+ACCOUNT_ADAPTER = 'gretel.adapters.AccountAdapter'
 HEADLESS_ONLY = True
 # Since we don't implement these views, there's no use in providing urls.
 # However, allauth requires them to be set. We set them to a placeholder
@@ -220,4 +225,3 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True
 # Print emails to console in debug mode
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-

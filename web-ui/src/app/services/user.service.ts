@@ -13,6 +13,7 @@ const urls = {
     password_reset_request: '_allauth/browser/v1/auth/password/request',
     password_reset: '_allauth/browser/v1/auth/password/reset',
     verify_email: '_allauth/browser/v1/auth/email/verify',
+    config: '_allauth/browser/v1/config',
 }
 
 export type User = {
@@ -26,6 +27,12 @@ type BaseResponse = {
     status: number;
     data?: any;
     errors?: any;
+}
+
+type ConfigResponse = BaseResponse & {
+    data: {
+        account: { is_open_for_signup: boolean };
+    };
 }
 
 type LoginResponse = BaseResponse&{
@@ -67,6 +74,7 @@ type ReturnBinder<T> = {
 export class UserService {
     private _user$ = new BehaviorSubject<User>(undefined);
     private _token$ = new BehaviorSubject<LoginResponse['meta']>(undefined);
+    private _registrationEnabled$ = new BehaviorSubject(false);
 
     constructor(
         private http: HttpClient,
@@ -74,10 +82,26 @@ export class UserService {
         private notificationService: NotificationService
     ) {
         this.get_status();
+        this.get_registration_config();
     }
 
     public get user$() {
         return this._user$;
+    }
+
+    public get registrationEnabled$() {
+        return this._registrationEnabled$;
+    }
+
+    private async get_registration_config(): Promise<void> {
+        try {
+            const config = await firstValueFrom(this.http.get<ConfigResponse>(
+                await this.configurationService.getDjangoUrl(urls.config)
+            ));
+            this._registrationEnabled$.next(config.data.account.is_open_for_signup);
+        } catch {
+            this.notificationService.add('Could not load registration settings.', 'error');
+        }
     }
 
     /**

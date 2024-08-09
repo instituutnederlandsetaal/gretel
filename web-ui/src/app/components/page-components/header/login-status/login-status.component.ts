@@ -57,6 +57,10 @@ export class LoginStatusComponent implements OnInit, OnDestroy {
         private userService: UserService,
         private notificationService: NotificationService) { }
 
+    get registrationEnabled() {
+        return this.userService.registrationEnabled$.value;
+    }
+
     getErrorMessage(key: string, value: any) {
         switch (key) {
             case 'required': return 'This field is required';
@@ -95,9 +99,9 @@ export class LoginStatusComponent implements OnInit, OnDestroy {
     }
 
     async signup() {
-        if (this.signupForm.valid && !this.loading) {
+        if (this.registrationEnabled && this.signupForm.valid && !this.loading) {
             this.loading = true;
-            if (this.userService.signup(this.signupForm.value.username, this.signupForm.value.email, this.signupForm.value.password)) {
+            if (await this.userService.signup(this.signupForm.value.username, this.signupForm.value.email, this.signupForm.value.password)) {
                 this.signupForm.reset();
                 this.notificationService.add('Account created', 'success');
             }

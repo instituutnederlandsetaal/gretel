@@ -65,7 +65,7 @@
         
         <div *ngIf="!user" class="">
             <a class="navbar-item" [ngClass]="{'is-active': mode === 'login'}" (click)="mode = 'login'">Login</a>
-            <a class="navbar-item" [ngClass]="{'is-active': mode === 'register'} " (click)="mode = 'register'">Register</a>
+            <a *ngIf="registrationEnabled" class="navbar-item" [ngClass]="{'is-active': mode === 'register'} " (click)="mode = 'register'">Register</a>
             <a class="navbar-item" [ngClass]="{'is-active': mode === 'resetPassword'} " (click)="mode = 'resetPassword'">Change password</a>
             
             <div *ngIf="mode === 'login'" class="p-2">
@@ -76,7 +76,7 @@
                 </form>
             </div>
             
-            <div *ngIf="mode === 'register'" class="p-2">
+            <div *ngIf="mode === 'register' && registrationEnabled" class="p-2">
                 <h5 class="subtitle">Sign up</h5>
                 <form [formGroup]="signupForm" (ngSubmit)="signup()">
                     <ng-container *ngTemplateOutlet="formInput; context: {group: signupForm, label: 'Username', type: 'text', placeholder: 'Username', required: true, autocomplete: 'username', formControlName: 'username'}"></ng-container>

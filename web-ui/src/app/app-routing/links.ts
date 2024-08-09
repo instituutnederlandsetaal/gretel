@@ -29,6 +29,11 @@ const links: Link[] = [
         proxy: false,
     },
     {
+        name: 'Upload',
+        link: '/upload-treebank',
+        proxy: false,
+    },
+    {
         name: 'About',
         link: '/about',
         proxy: false,

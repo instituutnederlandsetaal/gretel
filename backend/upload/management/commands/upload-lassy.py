@@ -115,8 +115,7 @@ class Command(BaseCommand):
                 number_of_sentences += 1
                 continue  # Do not include <?xml line in output file
             if 'cat="top"' in line:
-                # Like gretel-upload, determine number of words using the
-                # 'end' attribute in the top-level node
+                # Determine the number of words from the top-level node's 'end' attribute.
                 number_of_words += int(re.search('end="(.+?)"', line).group(1))
             if "<alpino_ds" in line:
                 # Add id to the end of the tag for identification in GrETEL
@@ -247,10 +246,10 @@ class Command(BaseCommand):
             )
         )
         if self.skipped_files:
-            self.stdout.write(
-                self.style.WARNING("Skipped {} files.".format(self.skipped_files))
-            )
-        self.treebank.processed = timezone.now()
+            self.stdout.write(self.style.WARNING(
+                'Skipped {} files.'
+                .format(self.skipped_files)
+            ))
         self.treebank.save()
 
     def handle(self, *args, **options):  # noqa: C901

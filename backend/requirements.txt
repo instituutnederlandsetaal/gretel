@@ -83,6 +83,8 @@ django==5.2.17
     #   django-livereload-server
     #   django-revproxy
     #   djangorestframework
+django-allauth==64.2.1
+    # via -r requirements.in
 django-livereload-server==0.5.1
     # via -r requirements.in
 django-revproxy==0.13.0
@@ -158,6 +160,8 @@ packaging==26.3
     #   weasel
 pandas==3.0.5
     # via mwe-query
+patool==4.1.0
+    # via -r requirements.in
 pivottablejs==0.9.0
     # via mwe-query
 pluggy==1.6.0

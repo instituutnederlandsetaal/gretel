@@ -1,8 +1,8 @@
 # `lassy_to_basex.py`
 
-This script mimics gretel-upload to add LASSY treebanks to BaseX, so that they
-can be used in GrETEL or manually by the end user. It also creates the
-following files:
+This script adds LASSY treebanks to BaseX for GrETEL 4 or manual use. For
+GrETEL 5, use Django's `upload-lassy` management command so the treebanks are
+registered with the backend. This script also creates the following files:
 
 - `{TREEBANK}.php`: GrETEL configuration file
 - The directory `treebank-parts`: GrETEL configuration files if components
@@ -11,16 +11,9 @@ following files:
 - `{TREEBANK}_components.csv`: a user-readable CSV file with information about
   all generated BaseX databases
 
-The steps following by this script are the same as those of gretel-upload,
-except:
-
-- This script does not create a merged database for the complete corpus,
-  because these are not used by GrETEL and it would double the size that a
-  corpus takes in BaseX.
-- This script does not use corpus2alpino for preprocessing, because all
-  files are already in the correct format.
-- This script does not use XML processing for the merge into one file; instead
-  it uses simple string manipulation.
+The script creates separate databases for the components without duplicating
+the complete corpus in a merged database. Input files are already in Alpino
+XML format, and the script combines them using string manipulation.
 
 ## Usage
 

@@ -50,9 +50,6 @@ export class LegacyComponent {
                 componentName: (name: string) => string
             }
         } = {
-            // matching provider and the corpus name
-            // the first matching rule is applied
-            // any remaining rules are ignored
             'gretel/cgn': {
                 corpusName: () => 'cgn',
                 componentName: (name) => name.replace('CGN_ID_', 'cgn-').toLowerCase()
@@ -60,39 +57,21 @@ export class LegacyComponent {
             'gretel/lassy': {
                 corpusName: () => 'lassy-klein',
                 componentName: (name) => name.replace('LASSY_ID_', '').toLowerCase()
-            },
-            'gretel/*': {
-                corpusName: (name) => 'GRETEL-UPLOAD-' + name,
-                componentName: (name) => 'GRETEL-UPLOAD-' + name
             }
         };
 
         const output: TreebankSelectionMap = {};
-        const rewrittenCorpora = new Set<string>();
+        for (const [provider, corpora] of Object.entries(selection)) {
+            output[provider] = { ...corpora };
+        }
 
         for (const [path, { corpusName, componentName }] of Object.entries(rules)) {
             const [matchProvider, matchCorpus] = path.split('/');
-            const corpora = selection[matchProvider];
-            if (corpora) {
-                for (const [corpus, components] of Object.entries(corpora)) {
-                    if (rewrittenCorpora.has(corpus)) {
-                        // only rewrite a corpus once
-                        continue;
-                    }
-
-                    if (corpus === matchCorpus ||
-                        (matchCorpus === '*' &&
-                            (!output[matchProvider] ||
-                                !(corpusName(corpus) in output[matchProvider])))
-                    ) {
-                        if (!output[matchProvider]) {
-                            output[matchProvider] = {}
-                        }
-                        // (sort is only needed to make this predictable for tests)
-                        output[matchProvider][corpusName(corpus)] = components.map(componentName).sort();
-                        rewrittenCorpora.add(corpus);
-                    }
-                }
+            const components = selection[matchProvider]?.[matchCorpus];
+            if (components) {
+                delete output[matchProvider][matchCorpus];
+                // Sort the converted IDs to keep redirects predictable.
+                output[matchProvider][corpusName(matchCorpus)] = components.map(componentName).sort();
             }
         }
 

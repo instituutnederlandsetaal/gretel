@@ -129,7 +129,7 @@ export class SubTreebanksComponent implements OnChanges, OnDestroy {
             },
             {} as ComponentSelection);
 
-        if (this.componentGroups?.length > 1 && variants?.length > 1) {
+        if (this.componentGroups?.length > 0 && variants?.length > 1) {
             // maybe a component is missing?
             this.components[MISSING_COMPONENT_ID] = {
                 description: '',
@@ -147,8 +147,8 @@ export class SubTreebanksComponent implements OnChanges, OnDestroy {
 
         this.variants = variants && variants.map(variant => ({
             name: variant,
-            selected: this.componentGroups
-                .map(g => this.components[g.components[variant]])
+            selected: Object.values(this.components)
+                .filter(component => component.variant === variant)
                 .every(component => this.isComponentSelectedOrDisabled(component))
         }));
         if (this.components) {
@@ -165,11 +165,13 @@ export class SubTreebanksComponent implements OnChanges, OnDestroy {
         const totalSentenceCountByVariant: FuzzyCounts = {};
         const totalWordCountByVariant: FuzzyCounts = {};
 
-        if (this.variants && this.componentGroups) {
+        if (this.componentGroups) {
             for (const group of this.componentGroups) {
                 totalSentenceCountByGroup[group.key] = new FuzzyNumber(0);
                 totalWordCountByGroup[group.key] = new FuzzyNumber(0);
             }
+        }
+        if (this.variants) {
             for (const variant of this.variants) {
                 totalSentenceCountByVariant[variant.name] = new FuzzyNumber(0);
                 totalWordCountByVariant[variant.name] = new FuzzyNumber(0);
@@ -179,11 +181,12 @@ export class SubTreebanksComponent implements OnChanges, OnDestroy {
             totalSentenceCount.add(subTreebank.sentenceCount);
             totalWordCount.add(subTreebank.wordCount);
 
-            if (this.variants && this.componentGroups) {
+            if (totalSentenceCountByGroup[subTreebank.group]) {
                 totalSentenceCountByGroup[subTreebank.group].add(subTreebank.sentenceCount);
-                totalSentenceCountByVariant[subTreebank.variant].add(subTreebank.sentenceCount);
-
                 totalWordCountByGroup[subTreebank.group].add(subTreebank.wordCount);
+            }
+            if (totalSentenceCountByVariant[subTreebank.variant]) {
+                totalSentenceCountByVariant[subTreebank.variant].add(subTreebank.sentenceCount);
                 totalWordCountByVariant[subTreebank.variant].add(subTreebank.wordCount);
             }
         }

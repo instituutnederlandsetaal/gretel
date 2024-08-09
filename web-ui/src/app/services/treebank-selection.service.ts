@@ -126,10 +126,11 @@ export class TreebankSelectionService {
     }
 
     async toggleVariant(provider: string, corpus: string, variant: string, selected?: boolean) {
-        this.updateTreebankState(provider, corpus, ['components', 'componentGroups', 'variants'],
+        return this.updateTreebankState(provider, corpus, ['components', 'variants'],
             (treebank, state, details) => {
-                const variantComponents = details.componentGroups.map(g => g.components[variant])
-                    .filter(id => id !== MISSING_COMPONENT_ID && !details.components[id].disabled);
+                const variantComponents = Object.values(details.components)
+                    .filter(component => component.variant === variant && !component.disabled)
+                    .map(component => component.id);
                 selected = selected != null
                     ? selected
                     : !variantComponents.every(id => state.components[id]);

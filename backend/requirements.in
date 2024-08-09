@@ -14,4 +14,5 @@ urllib3
 psycopg2
 elementpath
 
+patool>=2.3.0
 django-allauth>=64.0.0,<65

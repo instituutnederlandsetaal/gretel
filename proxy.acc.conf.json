@@ -1,8 +1,4 @@
 {
-    "/gretel-upload": {
-        "target": "https://acc.gretel-upload.hum.uu.nl/",
-        "changeOrigin": true
-    },
     "/api": {
         "target": "https://acc.gretel5.hum.uu.nl",
         "changeOrigin": true

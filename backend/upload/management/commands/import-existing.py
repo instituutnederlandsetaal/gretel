@@ -103,9 +103,9 @@ class Command(BaseCommand):
             raise CommandError("Treebank {} already exists.".format(self.treebank.slug))
 
         # Optional treebank-wide fields that are stored in JSON
-        self.treebank.variants = self.configuration.get("variants", "[]")
-        self.treebank.groups = self.configuration.get("groups", "{}")
-        self.treebank.metadata = self.configuration.get("metadata", "[]")
+        self.treebank.variants = self.configuration.get("variants", [])
+        self.treebank.groups = self.configuration.get("groups", [])
+        self.treebank.metadata = self.configuration.get("metadata", [])
 
         # Get all Component and BaseXDB objects
         component_objs = []

@@ -92,6 +92,7 @@ services:
       BASEX_HOST: basex
       ALPINO_HOST: alpino
       DATABASE_PATH: /app/backend/database/db.sqlite3
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-false}
     volumes: 
       - gretel-database:/app/backend/database/
       - gretel-uploads:/app/backend/uploaded_treebanks/
@@ -118,7 +119,8 @@ services:
       REDIS_HOST: redis
       BASEX_HOST: basex-dev
       ALPINO_HOST: alpino
-    ports: 
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-false}
+    ports:
       - 5678:5678
       - 8000:8000
     volumes: 

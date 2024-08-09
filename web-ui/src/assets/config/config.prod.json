@@ -1,9 +1,5 @@
 {
     "providers": {
-        "gretel": "../api/src/router.php/"
     },
-    "alpino": "../api/src/router.php/",
-    "uploadUrl": "../../gretel-upload/index.php/api/",
-    "uploadProvider": "gretel",
     "django": "/"
 }

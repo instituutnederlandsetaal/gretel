@@ -93,8 +93,7 @@ def process_file(input_filename):
             number_of_sentences += 1
             continue  # Do not include <?xml line in output file
         if 'cat="top"' in line:
-            # Like gretel-upload, determine number of words using the
-            # 'end' attribute in the top-level node
+            # Determine the number of words from the top-level node's 'end' attribute.
             number_of_words += int(
                 re.search('end=\"(.+?)\"', line).group(1)
             )

@@ -10,13 +10,13 @@ from rest_framework.decorators import (
 )
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework import status
 from django.conf import settings
-from django.db.utils import IntegrityError
 from lxml import etree
 
-from treebanks.models import Component, BaseXDB, Treebank
+from treebanks.models import Component, BaseXDB
+from treebanks.access import available_treebanks
 from .models import SearchQuery
 from .basex_search import (
     generate_xquery_showtree,
@@ -35,79 +35,8 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def _create_component_on_the_fly(component_slug: str, _treebank: str) -> None:
-    """Try to create a component object consisting of one database
-    with the same name. Also create Treebank object if it does not yet
-    exist.  Creation is meant for compatibility with
-    the existing separate gretel-upload application as long as
-    gretel-upload is not yet integrated into GrETEL."""
-
-    # The frontend adds a 'GRETEL-UPLOAD-' prefix to all gretel-upload
-    # components so that we can identify them. We leave this prefix
-    # in the component names but we have to remove it to access
-    # the BaseX databases, because the gretel-upload application
-    # created the BaseX databases and it does not know about this
-    # prefix.
-    if not component_slug.startswith("GRETEL-UPLOAD-"):
-        return
-    dbname = component_slug[len("GRETEL-UPLOAD-"):]
-    basex_db = BaseXDB(dbname)
-    try:
-        basex_db.size = basex_db.get_db_size()
-        nr_sentences = basex_db.get_number_of_sentences()
-        nr_words = basex_db.get_number_of_words()
-    except OSError:
-        log.error(
-            "Tried to create component for BaseX database {} "
-            "for gretel-upload compatibility, but BaseX "
-            "database does not exist.".format(dbname)
-        )
-        # Return without exception -- _get_or_create_components
-        # will see that not all components exist
-        return
-    treebank, _ = Treebank.objects.get_or_create(slug=_treebank)
-    component = Component(
-        slug=component_slug,
-        title=component_slug,
-        nr_sentences=nr_sentences,
-        nr_words=nr_words,
-    )
-    component.treebank = treebank
-    component.save()
-    basex_db.component = component
-    try:
-        basex_db.save()
-    except IntegrityError as err:
-        # This may happen if the BaseX database is also used by a
-        # configured treebank so that a BaseXDB object already exists,
-        # but it should not occur.
-        log.error(
-            "Error creating BaseXDB object on the fly for "
-            "{} component {}: {}.".format(dbname, component_slug, err)
-        )
-        # Delete Component object so that the view will generate
-        # an error.
-        component.delete()
-
-
-def _get_or_create_components(component_slugs, treebank):
-    """Check if all requested components are present as Component
-    objects in database; if not create them if a corresponing
-    BaseX database is present. Creation is meant for compatibility with
-    the existing separate gretel-upload application"""
-    existing_components = set(
-        Component.objects.filter(
-            slug__in=component_slugs, treebank__slug=treebank
-        ).values_list("slug", flat=True)
-    )
-    existing_components = set(map(lambda x: x.upper(), existing_components))
-    nonexisting_components = set(component_slugs) - existing_components
-    for component in nonexisting_components:
-        # These components were probably made by gretel-upload
-        # (a separate application). Create them if they indeed exist
-        _create_component_on_the_fly(component, treebank)
-        # Create BaseX database with the same name, because
-        # gretel-upload components exist of only one database
+def _get_components(component_slugs, treebank):
+    """Only search components registered with the requested Django treebank."""
     return Component.objects.filter(slug__in=component_slugs, treebank__slug=treebank)
 
 
@@ -296,7 +225,7 @@ def filter_exclude(xpath: str, results: ResultSet) -> ResultSet:
 
 
 @api_view(["POST"])
-@authentication_classes([BasicAuthentication])  # No CSRF verification for now
+@authentication_classes([SessionAuthentication, BasicAuthentication])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 @parser_classes([JSONParser])
 def search_view(request):  # noqa: C901
@@ -313,6 +242,9 @@ def search_view(request):  # noqa: C901
     is_analysis = data.get("is_analysis", False)
     variables = data.get("variables", [])
     behaviour = data.get("behaviour", {})
+    available = available_treebanks(request.user)
+    if not available.filter(pk=treebank).exists():
+        return Response({'error': 'Treebank not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if is_analysis:
         maximum_results = settings.MAXIMUM_RESULTS_ANALYSIS
@@ -341,6 +273,8 @@ def search_view(request):  # noqa: C901
             # tampering with queries of other users.
             # TODO: also check if the component list is correct
             query = SearchQuery.objects.get(pk=query_id)
+            if query.components.exclude(treebank__in=available).exists():
+                return Response({'error': 'Query not found.'}, status=status.HTTP_404_NOT_FOUND)
         except SearchQuery.DoesNotExist:
             return Response(
                 {"error": "Cannot find given query_id"},
@@ -348,7 +282,7 @@ def search_view(request):  # noqa: C901
             )
     else:
         new_query = True
-        component_objects = _get_or_create_components(component_slugs, treebank)
+        component_objects = _get_components(component_slugs, treebank)
         if component_objects.count() != len(component_slugs):
             return Response(
                 {"error": "Not all requested components could be found."},
@@ -416,7 +350,7 @@ def search_view(request):  # noqa: C901
 
 
 @api_view(["POST"])
-@authentication_classes([BasicAuthentication])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 @parser_classes([JSONParser])
 def cancel_query_view(request):
@@ -434,6 +368,8 @@ def cancel_query_view(request):
         # tampering with queries of other users.
         # TODO: also check if the component list is correct
         query = SearchQuery.objects.get(xpath=xpath, pk=query_id)
+        if query.components.exclude(treebank__in=available_treebanks(request.user)).exists():
+            return Response({'error': 'Query not found.'}, status=status.HTTP_404_NOT_FOUND)
     except SearchQuery.DoesNotExist:
         return Response(
             {"error": "Cannot find given query_id"}, status=status.HTTP_400_BAD_REQUEST
@@ -442,7 +378,7 @@ def cancel_query_view(request):
 
 
 @api_view(["POST"])
-@authentication_classes([BasicAuthentication])  # No CSRF verification for now
+@authentication_classes([SessionAuthentication, BasicAuthentication])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 @parser_classes([JSONParser])
 def tree_view(request):
@@ -458,6 +394,10 @@ def tree_view(request):
         xquery = generate_xquery_showtree(database, sentence_id)
     except ValueError as err:
         return Response({"error": str(err)}, status=status.HTTP_400_BAD_REQUEST)
+    if not BaseXDB.objects.filter(
+        pk=database, component__treebank__in=available_treebanks(request.user)
+    ).exists():
+        return Response({'error': 'Treebank not found.'}, status=status.HTTP_404_NOT_FOUND)
     try:
         result = basex.perform_query(xquery)
     except OSError as err:
@@ -468,7 +408,7 @@ def tree_view(request):
 
 
 @api_view(["POST"])
-@authentication_classes([BasicAuthentication])  # No CSRF verification for now
+@authentication_classes([SessionAuthentication, BasicAuthentication])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 @parser_classes([JSONParser])
 def metadata_count_view(request):
@@ -481,22 +421,17 @@ def metadata_count_view(request):
         return Response(
             {"error": "{} is missing".format(err)}, status=status.HTTP_400_BAD_REQUEST
         )
+    if not available_treebanks(request.user).filter(pk=treebank).exists():
+        return Response({'error': 'Treebank not found.'}, status=status.HTTP_404_NOT_FOUND)
     xml_pieces = []
     for component_slug in components:
-        if component_slug.startswith("GRETEL-UPLOAD-"):
-            # Directly access database - we cannot create
-            # component objects with _get_or_create_components
-            # because this API call is made parallel to the search
-            # call, and creating objects would cause a race
-            # condition.
-            dbs = [component_slug[len("GRETEL-UPLOAD-"):]]
-        else:
-            component = Component.objects.get(
-                slug=component_slug, treebank__slug=treebank
-            )
-            if not component.treebank.metadata:
-                continue
-            dbs = component.get_databases().keys()
+        try:
+            component = Component.objects.get(slug=component_slug, treebank__slug=treebank)
+        except Component.DoesNotExist:
+            return Response({'error': 'Component not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if not component.treebank.metadata:
+            continue
+        dbs = component.get_databases().keys()
         for db in dbs:
             xquery = generate_xquery_metadata_count(db, xpath)
             try:

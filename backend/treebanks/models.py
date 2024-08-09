@@ -18,13 +18,8 @@ logger = logging.getLogger(__name__)
 class Treebank(models.Model):
     slug = models.SlugField(max_length=200, primary_key=True)
     title = models.CharField(max_length=1000)
-    description = models.TextField(blank=True)
-    url_more_info = models.URLField(blank=True)
-    # The following fields are for user-uploaded treebanks only
-    input_file = models.FileField(upload_to="uploaded_treebanks/", blank=True)
-    upload_timestamp = models.DateTimeField(
-        verbose_name="Upload date and time", null=True, blank=True
-    )
+    description = models.TextField(blank=True, default='')
+    url_more_info = models.URLField(blank=True, default='')
     variants = models.JSONField(blank=True, default=list)
     groups = models.JSONField(blank=True, default=dict)
     metadata = models.JSONField(blank=True, default=list)

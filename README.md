@@ -90,6 +90,49 @@ This will run the backend and frontend applications, as well as their unittests,
 
 [8]: #development-mode-vs-production-mode
 
+### User registration and dataset uploads
+
+Uploading datasets requires a signed-in user. Existing users, including
+superusers, can upload public or private datasets. User registration is disabled
+by default and can be enabled with a backend environment variable:
+
+```console
+REGISTRATION_ENABLED=false
+```
+
+Set this variable to `true` to enable registration. Docker Compose passes it to
+the backend; put it in `docker/.env` or export it before starting Compose.
+Restart the backend process after changing it (recreate the backend container
+when using Docker). The frontend hides registration when disabled and asks
+visitors to sign in before uploading. The backend also enforces these
+restrictions on direct API requests. Public datasets remain searchable without
+signing in.
+
+To provision the initial superuser, activate the backend Python environment and
+run this command from the repository root:
+
+```console
+yarn django provision-superuser --username admin --email admin@example.org
+```
+
+For a running Docker deployment, use:
+
+```console
+docker exec -it gretel-backend python manage.py provision-superuser --username admin --email admin@example.org
+```
+
+The command prompts for a password and marks this operator-provided email as
+verified, so the account can sign in through the frontend while registration is
+closed. For noninteractive provisioning, pass `--noinput` and supply the password
+through `DJANGO_SUPERUSER_PASSWORD`. Django's standard `createsuperuser` command
+remains available, but does not mark the email as verified for frontend sign-in.
+
+Sign in using the frontend's **Login** menu, open **Upload** (`/upload-treebank`),
+enter the dataset details, select the input file, check **Public**, and submit.
+Celery indexes the dataset; it becomes visible to anonymous visitors after
+processing completes. BaseX, Celery, Redis, and Alpino (for unparsed input) must
+be running as described above.
+
 ### Recommended order of development
 
 For each new feature, we suggested that you work through the steps listed below. This could be called a back-to-front or "bottom up" order. Of course, you may have reasons to choose otherwise. For example, if very precise specifications are provided, you could move step 8 to the front for a more test-driven approach.

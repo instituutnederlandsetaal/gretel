@@ -15,8 +15,8 @@ import { HttpClientMock } from './mocks/http-client.mock';
 
 import {
     ConfigurationService,
-    UploadedTreebankResponse,
-    ConfiguredTreebanksResponse,
+    DjangoTreebankResponse,
+    DjangoComponentsForTreebankResponse,
     StateService,
     TreebankService,
     NotificationService
@@ -56,56 +56,44 @@ export function commonTestBed() {
             useClass: Title
         });
 
-    // common mock data
-    httpClientMock.setData('get', '/gretel-upload/index.php/api/treebank', [] as UploadedTreebankResponse[]);
-
-    httpClientMock.setData('get', '/gretel/api/src/router.php/configured_treebanks', {
-        'test-treebank': {
-            title: 'test title',
-            metadata: [],
-            description: 'test treebank',
-            variants: {
-                'v1': { display: 'v1' },
-                'v2': { display: 'v2' }
-            },
-            groups: {
-                'test-group': {
-                    description: 'test group description'
-                }
-            },
-            components: {
-                'test-component1': {
-                    description: '',
-                    // Omitted on purpose
-                    // disabled: false,
-                    group: 'test-group',
-                    id: 'test-component1',
-                    sentences: 10,
-                    words: 100,
-                    title: '',
-                    variant: 'v1',
-                },
-                'test-component2': {
-                    id: 'test-component2',
-                    title: '',
-                    description: '',
-                    sentences: 20,
-                    words: 200,
-                    group: 'test-group',
-                    variant: 'v2',
-                    disabled: true
-                }
-            }
-        }
-    } as ConfiguredTreebanksResponse);
-
-    httpClientMock.setData('post', '/gretel/api/src/router.php/treebank_counts', (body: any) => {
-        return { 'TEST_DATABASE1_COMPONENT1': '42' };
+    // Common Django API fixtures.
+    httpClientMock.setData('get', '/_allauth/browser/v1/config', {
+        status: 200, data: { account: { is_open_for_signup: false } },
     });
+    httpClientMock.setData('get', '/_allauth/browser/v1/auth/session', { status: 401 });
+    httpClientMock.setData('get', '/treebanks/treebank/', [{
+        slug: 'test-treebank',
+        title: 'test title',
+        description: 'test treebank',
+        url_more_info: '',
+        is_public: true,
+        variants: ['v1', 'v2'],
+        groups: [{ slug: 'test-group', description: 'test group description' }],
+    }] as DjangoTreebankResponse[]);
 
-    httpClientMock.setData('post', '/gretel/api/src/router.php/results', (body: any) => {
-        return false;
-    });
+    httpClientMock.setData('get', '/treebanks/treebank/test-treebank/components/', [{
+        slug: 'test-component1',
+        title: '',
+        description: '',
+        group: 'test-group',
+        variant: 'v1',
+        nr_sentences: '10',
+        nr_words: '100',
+    }, {
+        slug: 'test-component2',
+        title: '',
+        description: '',
+        group: 'test-group',
+        variant: 'v2',
+        nr_sentences: '20',
+        nr_words: '200',
+    }] as DjangoComponentsForTreebankResponse[]);
+
+    httpClientMock.setData('get', '/treebanks/treebank/test-treebank/metadata/', { metadata: [] });
+    httpClientMock.setData('post', '/search/metadata-count/', () => ({}));
+    httpClientMock.setData('post', '/search/search/', () => ({
+        query_id: 1, search_percentage: 100, results: [], counts: [], errors: '',
+    }));
 
     return {
         testingModule: TestBed.configureTestingModule({

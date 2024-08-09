@@ -12,6 +12,7 @@ import { PathVariable, Location } from 'lassy-xpath';
 import { NotificationService } from './notification.service';
 
 const httpOptions = {
+    withCredentials: true,
     headers: new HttpHeaders({
         'Content-Type': 'application/json',
     })
@@ -249,7 +250,8 @@ export class ResultsService {
         }
         const response = await firstValueFrom(this.http.post<ApiTreeResult>(
             url2,
-            data
+            data,
+            httpOptions
         ));
         return this.highlightSentenceNodes(response.tree, nodeIds);
     }
@@ -277,23 +279,6 @@ export class ResultsService {
             treebank: corpus,
             components,
         }, httpOptions));
-    }
-
-    /** On error the returned promise rejects with @type {HttpErrorResponse} */
-    async treebankCounts(xpath: string, provider: string, corpus: string, components: string[], metadataFilters: FilterValue[] = []) {
-        const results = await firstValueFrom(this.http.post<{ [componentId: string]: string }>(
-            await this.configurationService.getApiUrl(provider, 'treebank_counts'), {
-            xpath: this.createFilteredQuery(xpath, metadataFilters),
-            corpus,
-            components,
-        }, httpOptions));
-
-        return Object.keys(results).map(componentId => {
-            return {
-                componentId: componentId,
-                count: parseInt(results[componentId], 10)
-            } as TreebankCount;
-        });
     }
 
     /**
@@ -721,11 +706,6 @@ export interface FilterByXPath {
      * been changed by the user (in the results component).
      */
     contextXpath: string;
-}
-
-export interface TreebankCount {
-    componentId: string;
-    count: number;
 }
 
 export interface MetadataValueCounts { [key: string]: { [value: string]: number }; }

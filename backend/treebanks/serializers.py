@@ -3,10 +3,16 @@ from rest_framework import serializers
 
 
 class TreebankSerializer(serializers.ModelSerializer):
+    is_public = serializers.SerializerMethodField()
+
+    def get_is_public(self, treebank):
+        upload = getattr(treebank, 'treebankupload', None)
+        return upload.public if upload else True
+
     class Meta:
         model = Treebank
         fields = ['slug', 'title', 'description', 'url_more_info', 'variants',
-                  'groups']
+                  'groups', 'is_public']
 
 
 class ComponentSerializer(serializers.ModelSerializer):

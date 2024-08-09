@@ -17,6 +17,7 @@ import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { LassyXPathModule } from 'lassy-xpath';
 import { ClipboardModule } from 'ngx-clipboard';
+import { ProgressBarModule } from 'primeng/progressbar'
 
 import { AppComponent } from './app.component';
 import { AboutContentComponent } from './pages/about-page/about-content.component';
@@ -84,6 +85,7 @@ import { HighlightMatchPipe } from './highlight-match.pipe';
 import { TransitionNumbersPipe } from './transition-numbers.pipe';
 import { QuerySetComponent } from './components/step/query-set/query-set.component';
 import { MweResultsComponent } from './components/step/mwe-results/mwe-results.component';
+import { UploadComponent } from './pages/upload/upload.component';
 import { LegacyComponent } from './pages/legacy-component';
 
 export const declarations: any[] = [
@@ -139,7 +141,8 @@ export const declarations: any[] = [
     XpathInputComponent,
     XpathSearchComponent,
     XPathViewerComponent,
-    MweResultsComponent
+    MweResultsComponent,
+    UploadComponent
 ];
 
 export const imports: any[] = [
@@ -165,7 +168,8 @@ export const imports: any[] = [
     RouterModule,
     TableModule,
     TooltipModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    ProgressBarModule,
 ];
 
 export const providers: any[] = [

@@ -12,3 +12,4 @@ export * from './treebank.service';
 export * from './treebank-selection.service';
 export * from './parse.service';
 export * from './mwe.service';
+export * from './upload.service';

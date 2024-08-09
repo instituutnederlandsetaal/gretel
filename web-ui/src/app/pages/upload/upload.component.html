@@ -1,0 +1,25 @@
+<div class="content">
+    <p *ngIf="!canUpload">Please sign in using the Login menu to upload a dataset.</p>
+    <form *ngIf="canUpload" (ngSubmit)="upload()">
+        <label><input type="text" [(ngModel)]="treebankName"> Treebank Name</label><br>
+        
+        <label><input type="file" name="file" (change)="selectFile($event)"> File</label><br>
+        <label><select name="input_format" [(ngModel)]="format">
+            <option value="">Detect automatically</option>
+            <option value="A">Alpino</option>
+            <option value="C">CHAT</option>
+            <option value="T">Plaintext</option>
+            <option value="F">FoLiA</option>
+        </select></label><br>
+
+        <label><input type="text" [(ngModel)]="treebankDescription" name="treebankDescription"> Treebank description</label><br>
+        <label><input type="text" [(ngModel)]="treebankHelpUrl" name="treebankHelpUrl"> Help url</label><br>
+
+        <label><input type="checkbox" [(ngModel)]="isPublic" name="public"> Public</label><br>
+
+        <button [disabled]="isUploading" type="submit">Go!</button><br>
+    </form>
+    
+    <p-progressBar *ngIf="isUploading" [value]="uploadProgress"></p-progressBar>
+    <div *ngIf="warning" class="notification is-danger break-word">{{warning}}</div>
+</div>
