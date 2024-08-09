@@ -1,11 +1,11 @@
-<div class="navbar-item has-dropdown" [ngClass]="{ 'is-active': active }" *ngIf="allowLogin">
-    <a class="navbar-link is-arrowless" (click)="toggleActive()">
+<div class="navbar-item has-dropdown" [ngClass]="{ 'is-active': active }">
+    <a class="navbar-link is-arrowless" (click)="toggleActive($event)">
         <ng-container *ngIf="user">
             <span class="icon">
                 <fa-icon [icon]="faUser" aria-hidden="true"></fa-icon>
             </span>
             <span>
-                {{ user.displayName }}
+                {{ user.username }}
             </span>
         </ng-container>
         <ng-container *ngIf="!user">
@@ -18,39 +18,96 @@
         </ng-container>
     </a>
 
-    <div class="navbar-dropdown is-right">
-        <a class="navbar-item" *ngIf="user" [ngClass]="{'is-disabled': loading}" (click)="logout()">
-            Logout
-        </a>
+    <ng-template #formInput 
+        let-type="type" 
+        let-label="label" 
+        let-placeholder="placeholder" 
+        let-required="required" 
+        let-formControlName="formControlName" 
+        let-group="group"
+        let-autocomplete="autocomplete"
+    >
+        <div class="field">
+            <label class="label" [for]="formControlName">{{label}}</label>
+            <div class="control">
+                <input class="input" 
+                    [ngClass]="{'is-danger': group.get(formControlName).touched && !!group.get(formControlName).errors}"
+                    [name]="formControlName" 
+                    [type]="type" 
+                    [placeholder]="placeholder" 
+                    [required]="required" 
+                    [autocomplete]="autocomplete"
+                    [formControl]="group.get(formControlName)"
+                >
+            </div>
+            
+            <p class="help is-danger" *ngIf="group.get(formControlName).errors && group.get(formControlName).touched">
+                <ng-container *ngFor="let entry of group.get(formControlName).errors | keyvalue">
+                    {{getErrorMessage($any(entry.key), entry.value)}}
+                </ng-container>
+            </p>
+        </div>
+    </ng-template>
 
-        <form [formGroup]="loginForm" (ngSubmit)="login()" *ngIf="!user">
-            <div class="navbar-item">
-                <div class="field">
-                    <label class="label">Username</label>
-                    <div class="control">
-                        <input class="input" type="text" placeholder="Username" required formControlName="username">
-                    </div>
-                </div>
+    <ng-template #submit let-label="label" let-group="group">
+        <div class="control">
+            <button class="button" type="submit" [ngClass]="{'is-loading': loading, 'is-primary': !loading}" [disabled]="group.status !== 'VALID'">
+                {{label}}
+            </button>
+        </div>
+    </ng-template>
+
+    <div class="navbar-dropdown is-right">
+        <ng-container *ngIf="user">
+            <a class="navbar-item" [ngClass]="{'is-disabled': loading}" (click)="logout()">Logout</a>
+        </ng-container>
+        
+        
+        <div *ngIf="!user" class="">
+            <a class="navbar-item" [ngClass]="{'is-active': mode === 'login'}" (click)="mode = 'login'">Login</a>
+            <a class="navbar-item" [ngClass]="{'is-active': mode === 'register'} " (click)="mode = 'register'">Register</a>
+            <a class="navbar-item" [ngClass]="{'is-active': mode === 'resetPassword'} " (click)="mode = 'resetPassword'">Change password</a>
+            
+            <div *ngIf="mode === 'login'" class="p-2">
+                <form [formGroup]="loginForm" (ngSubmit)="login()">
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: loginForm, label: 'Email', type: 'text', placeholder: 'Email', required: true, autocomplete: 'email', formControlName: 'email'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: loginForm, label: 'Password', type: 'password', placeholder: 'pass', required: true, autocomplete: 'current-password', formControlName: 'password'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="submit; context: {label: 'Login', group: loginForm}"></ng-container>
+                </form>
             </div>
-            <div class="navbar-item">
-                <div class="field">
-                    <label class="label">Password</label>
-                    <div class="control">
-                        <input class="input" type="password" placeholder="Password" required formControlName="password">
-                    </div>
-                </div>
+            
+            <div *ngIf="mode === 'register'" class="p-2">
+                <h5 class="subtitle">Sign up</h5>
+                <form [formGroup]="signupForm" (ngSubmit)="signup()">
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: signupForm, label: 'Username', type: 'text', placeholder: 'Username', required: true, autocomplete: 'username', formControlName: 'username'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: signupForm, label: 'Email', type: 'text', placeholder: 'Email', required: true, autocomplete: 'email', formControlName: 'email'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: signupForm, label: 'Password', type: 'password', placeholder: 'pass', required: true, autocomplete: 'new-password', formControlName: 'password'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: signupForm, label: 'Password (again)', type: 'password', placeholder: 'pass', required: true, autocomplete: 'new-password', formControlName: 'password2'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="submit; context: {label: 'Signup', group: signupForm}"></ng-container>
+                
+                </form>
+                <hr>
+                <h5 class="subtitle">Verify Email</h5>
+                <form [formGroup]="verifyEmailForm" (ngSubmit)="verifyEmail()">
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: verifyEmailForm, label: 'Verification Code', type: 'text', placeholder: 'code', required: true, formControlName: 'code'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="submit; context: {label: 'Verify', group: verifyEmailForm}"></ng-container>
+                </form>
             </div>
-            <div class="navbar-item">
-                <div class="field">
-                    <div class="control">
-                        <button class="button" type="submit"
-                            [ngClass]="{'is-loading': loading, 'is-primary': !loading, 'is-danger':error}">
-                            Login
-                        </button>
-                    </div>
-                    <p class="help is-danger" *ngIf="error">Check your input</p>
-                </div>
+            <div *ngIf="mode === 'resetPassword'" class="p-2">
+                <h5 class="subtitle">Request reset code</h5>
+                <form [formGroup]="requestResetPasswordForm" (ngSubmit)="requestResetPassword()">
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: requestResetPasswordForm, label: 'Email', type: 'text', placeholder: 'Email', required: true, autocomplete: 'email', formControlName: 'email'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="submit; context: {label: 'Request Code', group: requestResetPasswordForm}"></ng-container>
+                </form>
+                <hr>
+                <h5 class="subtitle">Reset Password</h5>
+                <form [formGroup]="performResetPasswordForm" (ngSubmit)="performResetPassword()">
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: performResetPasswordForm, label: 'Reset Code', type: 'text', placeholder: 'code', required: true, formControlName: 'code'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: performResetPasswordForm, label: 'New Password', type: 'password', placeholder: 'pass', required: true, autocomplete: 'new-password', formControlName: 'password'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="formInput; context: {group: performResetPasswordForm, label: 'New Password (again)', type: 'password', placeholder: 'pass', required: true, autocomplete: 'new-password', formControlName: 'password2'}"></ng-container>
+                    <ng-container *ngTemplateOutlet="submit; context: {label: 'Reset Password', group: performResetPasswordForm}"></ng-container>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>

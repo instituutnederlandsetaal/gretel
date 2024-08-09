@@ -30,5 +30,13 @@
     "/treebanks/": {
         "target": "https://gretel5.hum.uu.nl/",
         "changeOrigin": true
+    },
+    "/_allauth/": {
+        "target": "https://gretel5.hum.uu.nl/",
+        "changeOrigin": true
+    },
+    "/auth": {
+        "target": "https://gretel5.hum.uu.nl/",
+        "changeOrigin": true
     }
 }

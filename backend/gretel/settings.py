@@ -39,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'livereload',
     'django.contrib.staticfiles',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.headless',
+    'allauth.usersessions',
+
     'services',
     'treebanks',
     'search',
@@ -57,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'allauth.account.middleware.AccountMiddleware'
 ]
 
 ROOT_URLCONF = 'gretel.urls'
@@ -64,7 +71,9 @@ ROOT_URLCONF = 'gretel.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,6 +114,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 
@@ -174,3 +191,33 @@ CACHING_DIR = BASE_DIR / 'query_result_cache'
 MAXIMUM_CACHE_SIZE = 256  # Maximum cache size in MiB
 STATICFILES_DIRS: List[str] = []
 PROXY_FRONTEND = None
+
+# Allauth settings
+HEADLESS_ONLY = True
+# Since we don't implement these views, there's no use in providing urls.
+# However, allauth requires them to be set. We set them to a placeholder
+# We override the email templates to prevent showing the urls, and just print the code + instructions.
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": "{key}",
+    # Key placeholders are automatically populated. You are free to adjust this
+    # to your own needs, e.g.
+    #
+    # "https://app.project.org/account/email/verify-email?token={key}",
+    "account_reset_password": "/",
+    "account_reset_password_from_key": "{key}",
+    "account_signup": "/",
+    # Fallback in case the state containing the `next` URL is lost and the handshake
+    # with the third-party provider fails.
+    "socialaccount_login_error": "/",
+}
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+
+# Print emails to console in debug mode
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+

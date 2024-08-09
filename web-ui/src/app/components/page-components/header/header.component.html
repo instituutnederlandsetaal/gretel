@@ -12,7 +12,7 @@
             <span aria-hidden="true"></span>
         </a>
     </div>
-    <grt-navigation class="navbar-menu" [ngClass]="{'is-active':menuExpanded}" (click)="menuExpanded=!menuExpanded">
+    <grt-navigation class="navbar-menu" [ngClass]="{'is-active':menuExpanded}">
     </grt-navigation>
 </nav>
 <div class="notification is-radiusless" *ngIf="show" [ngClass]="messageType" [@slideDown]>

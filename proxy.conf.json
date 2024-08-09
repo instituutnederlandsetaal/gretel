@@ -30,5 +30,17 @@
     "/treebanks/": {
         "target": "http://localhost:8000/",
         "secure": false
+    },
+    "/upload/": {
+        "target": "http://localhost:8000/",
+        "secure": false
+    },
+    "/_allauth/": {
+        "target": "http://localhost:8000/",
+        "secure": false
+    },
+    "/auth": {
+        "target": "http://localhost:8000/",
+        "secure": false
     }
 }

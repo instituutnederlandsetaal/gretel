@@ -17,5 +17,9 @@ urlpatterns = [
 
     path('admin', RedirectView.as_view(url='/admin/', permanent=True)),
     path('admin/', admin.site.urls),
+
+    path('auth/', include('allauth.urls')),
+    path('_allauth/', include('allauth.headless.urls')),
+
     # spa_url,  # catch-all; unknown paths to be handled by a SPA
 ]

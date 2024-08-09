@@ -27,5 +27,13 @@
     "/treebanks/": {
         "target": "http://gretel-backend:8000/",
         "secure": false
+    },
+    "/auth/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
+    },
+    "/_allauth/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
     }
 }
