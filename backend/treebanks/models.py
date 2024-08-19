@@ -21,7 +21,7 @@ class Treebank(models.Model):
     description = models.TextField(blank=True, default='')
     url_more_info = models.URLField(blank=True, default='')
     variants = models.JSONField(blank=True, default=list)
-    groups = models.JSONField(blank=True, default=dict)
+    groups = models.JSONField(blank=True, default=list)
     metadata = models.JSONField(blank=True, default=list)
 
     def __str__(self):
