@@ -427,7 +427,7 @@ export class ResultsService {
                 previousSentence,
                 nextSentence,
                 highlightedSentence: this.highlightSentence(sentence, nodeStarts, 'strong'),
-                highlightedSentence2: this.highlightSentence(sentence2, nodeStarts, 'strong'),
+                highlightedSentence2: this.highlightSentence(sentence2 || '', nodeStarts, 'strong'),
                 treeXml: result.xml_sentences,
                 nodeIds: result.ids.split('-').map(x => parseInt(x, 10)),
                 nodeStarts,
@@ -543,7 +543,6 @@ export class ResultsService {
         // Instead of wrapping each individual word in a tag, merge sequences
         // of words in one <tag>...</tag>
         for (let i = 0; i < words.length; i++) {
-            const word = words[i];
             if (nodeStarts.indexOf(i) >= 0) {
                 let value = '';
                 if (nodeStarts.indexOf(i - 1) === -1) {

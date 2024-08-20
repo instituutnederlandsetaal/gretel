@@ -36,6 +36,7 @@ class Result:
         return dict(
             sentid=self._match.sentid,
             sentence=self._match.sentence,
+            sentence2=self._match.sentence2,
             prevs=self._prevs,
             nexts=self._nexts,
             ids=self._match.ids,

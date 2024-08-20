@@ -100,10 +100,10 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
     }> = [
         { field: 'number', header: '#', width: '5%' },
         { field: 'fileId', header: 'ID', width: '20%' },
-        { field: 'blacklabLink', header: 'BlackLab', width: '5%' },
+        // { field: 'blacklabLink', header: 'BlackLab', width: '5%' },
         { field: 'componentDisplayName', header: 'Component', width: '20%' },
-        { field: 'highlightedSentence', header: 'Sentence', width: 'fill' },
-        { field: 'highlightedSentence2', header: 'Sentence', width: 'fill' },
+        { field: 'highlightedSentence', header: 'Sentence', width: '20%' },
+        { field: 'highlightedSentence2', header: 'Vernederlandst', width: '20%' },
     ];
     public columns = this.defaultColumns.concat();
     public selectedColumns = this.defaultColumns.concat();
