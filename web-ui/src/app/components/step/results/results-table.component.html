@@ -174,7 +174,12 @@
                                 <span *ngIf="retrieveContext" class="content is-small">
                                     {{rowData['nextSentence']}}</span>
                             </ng-container>
-
+                            
+                            <ng-container *ngSwitchCase="'blacklabLink'">
+                                <a href="{{rowData[col.field]}}" target="_blank">View Sentence in BlackLab</a>
+                            </ng-container>
+                            
+                            
                             <span [innerHTML]="rowData[col.field]" *ngSwitchDefault></span>
                         </ng-container>
                     </td>
