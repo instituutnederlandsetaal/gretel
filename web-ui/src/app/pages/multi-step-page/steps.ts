@@ -2,9 +2,10 @@ import { ExtractinatorService, ReconstructorService, PathVariable } from 'lassy-
 
 import { DefaultTokenAttributes, TokenAttributes } from '../../models/matrix';
 import { AlpinoService } from '../../services/alpino.service';
-import { TreebankService } from '../../services/treebank.service';
+import { TreebankLookup, TreebankService } from '../../services/treebank.service';
 import { FilterValues, SearchVariable, NotificationService, MweQuerySet, MweQuery } from '../../services/_index';
-import { TreebankSelection } from '../../treebank';
+import { Treebank, TreebankComponents, TreebankSelection } from '../../treebank';
+import { first, mergeMap, tap, map, from, takeUntil, race, of, mapTo, Observable, filter } from 'rxjs';
 
 /**
  * Contains all the steps that are used in the xpath search
@@ -332,9 +333,51 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
      * @returns the updates state
      */
     async enterStep(state: T) {
-        state.currentStep = this;
-        state.valid = state.selectedTreebanks.hasAnySelection();
-        return state;
+        return new Promise<T>((resolve, reject) => {
+            state.currentStep = this;
+            const flattenTreebanks = (tb: TreebankLookup): Treebank[] => Object.values(tb).flatMap(d => Object.values(d));
+
+            const tooManyTreebanks: Observable<null> = this.treebankService.treebanks
+                .pipe(
+                    map(flattenTreebanks),
+                    first(treebanks => treebanks.length > 1),
+                    map(() => null) // emit something we can pick up as error
+                )
+
+            const doneWithOneTreebank: Observable<null|{treebank: Treebank, components: TreebankComponents}> =
+                from(this.treebankService.getTreebanks()).pipe(
+                    map(flattenTreebanks),
+                    filter(tbs => tbs.length === 1),
+                    map(tbs => tbs[0]),
+                    mergeMap(treebank => treebank.details
+                        .components()
+                        .then(components => ({ treebank, components }))),
+                    // we know this has at most one event so no need to first()
+                )
+
+            // we can only finish on done, or there might be more treebanks.
+            // we can however abort early if there is more than one treebank.
+            race([tooManyTreebanks, doneWithOneTreebank])
+            .subscribe(data => {
+                if (data) {
+                    const {treebank, components} = data;
+                    state.selectedTreebanks = new TreebankSelection(this.treebankService);
+                    state.selectedTreebanks.data = {
+                        [treebank.provider]: {
+                            [treebank.id]: {
+                                selected: true,
+                                components: Object.values(components).reduce((acc, c) => {
+                                    acc[c.id] = true;
+                                    return acc;
+                                }, {})
+                            }
+                        }
+                    }
+                }
+                state.valid = state.selectedTreebanks.hasAnySelection();
+                resolve(state);
+            });
+        })
     }
 
     leaveStep(state: T) {

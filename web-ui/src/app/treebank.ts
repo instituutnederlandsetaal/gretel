@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import type { TreebankLookup } from './services/treebank.service';
 
 export class FuzzyNumber {
     public value = 0;
@@ -271,6 +271,32 @@ export class TreebankSelection {
                 }
             }
         }
+
+        this.treebankService.getTreebanks()
+            .then<void|{treebank: Treebank, components: TreebankComponents}>(({data, providers}) => {
+                const treebanks = Object.values(data).flatMap(p => Object.values(p));
+                if (treebanks.length === 1) {
+                    return treebanks[0].details.components().then(components => ({components, treebank: treebanks[0]}));
+                }
+                return Promise.resolve();
+            })
+            .then(d => {
+                if (!d) return;
+                // If we're here, there's only one treebank, so we can select all components
+                const provider = d.treebank.provider;
+                const id = d.treebank.id;
+                const components = d.components;
+
+                this.data[provider] = {
+                    [id]: {
+                        selected: true,
+                        components: Object.values(components).reduce((acc, component) => {
+                            acc[component.id] = true;
+                            return acc;
+                        }, {})
+                    }
+                }
+            })
     }
 
     clone() {
@@ -284,7 +310,8 @@ export class TreebankSelection {
 
 // To prevent a circular dependency (actual TreebankService needs this file)
 interface TreebankService {
-    get(corpora: string, corpus: string): Promise<Treebank>;
+    get(provider: string, corpus: string): Promise<Treebank>;
+    getTreebanks(): Promise<TreebankLookup>;
 }
 
 export interface TreebankSelectionData {
