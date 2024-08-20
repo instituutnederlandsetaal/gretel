@@ -348,9 +348,9 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
             const doneWithOneTreebank: Observable<null|{treebank: Treebank, components: TreebankComponents}> =
                 from(this.treebankService.getTreebanks()).pipe(
                     map(flattenTreebanks),
-                    filter(tbs => tbs.length === 1),
+                    filter(tbs => tbs.length <= 1),
                     map(tbs => tbs[0]),
-                    mergeMap(treebank => treebank.details
+                    mergeMap((treebank: Treebank|undefined) => treebank?.details
                         .components()
                         .then(components => ({ treebank, components }))),
                     // we know this has at most one event so no need to first()
