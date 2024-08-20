@@ -103,6 +103,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
         { field: 'blacklabLink', header: 'BlackLab', width: '5%' },
         { field: 'componentDisplayName', header: 'Component', width: '20%' },
         { field: 'highlightedSentence', header: 'Sentence', width: 'fill' },
+        { field: 'highlightedSentence2', header: 'Sentence', width: 'fill' },
     ];
     public columns = this.defaultColumns.concat();
     public selectedColumns = this.defaultColumns.concat();
@@ -161,12 +162,13 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
             this.selectedColumns = this.selectedColumns.filter(c => {
                 return this.columns.some(col => col.field === c.field);
             })
-        
+
             this.processedHits = changes.filteredResults.currentValue.map(hit => ({
                 ...hit.metaValues,
                 fileId: hit.fileId,
                 componentDisplayName: hit.componentDisplayName,
                 highlightedSentence: hit.highlightedSentence,
+                highlightedSentence2: hit.highlightedSentence2,
                 previousSentence: hit.previousSentence,
                 nextSentence: hit.nextSentence,
             }));

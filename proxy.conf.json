@@ -1,42 +1,42 @@
 {
     "/api": {
-        "target": "http://localhost:8000",
+        "target": "http://gretel5.ivdnt.loc",
         "secure": false
     },
     "/admin": {
-        "target": "http://localhost:8000",
+        "target": "http://gretel5.ivdnt.loc",
         "secure": false
     },
     "/static": {
-        "target": "http://localhost:8000",
+        "target": "http://gretel5.ivdnt.loc",
         "secure": false
     },
     "/mwe/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/parse/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/search/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/treebanks/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/upload/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/_allauth/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     },
     "/auth/": {
-        "target": "http://localhost:8000/",
+        "target": "http://gretel5.ivdnt.loc/",
         "secure": false
     }
 }

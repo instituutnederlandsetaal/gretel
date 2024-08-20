@@ -8,6 +8,7 @@ from lxml import etree
 class BaseXMatch:
     sentid: str
     sentence: str
+    sentence2: str
     ids: str
     begins: str
     xml_sentences: str

@@ -410,6 +410,7 @@ export class ResultsService {
         return Promise.all(results.results.map(async result => {
             const hitId = result.sentid;
             const sentence = result.sentence;
+            const sentence2 = result.sentence2;
             const previousSentence = result.prevs;
             const nextSentence = result.nexts;
             const nodeStarts = result.begins.split('-').map(x => parseInt(x, 10));
@@ -422,9 +423,11 @@ export class ResultsService {
                 database,
                 fileId: hitId.replace(/\+match=\d+$/, ''),
                 sentence,
+                sentence2,
                 previousSentence,
                 nextSentence,
                 highlightedSentence: this.highlightSentence(sentence, nodeStarts, 'strong'),
+                highlightedSentence2: this.highlightSentence(sentence2, nodeStarts, 'strong'),
                 treeXml: result.xml_sentences,
                 nodeIds: result.ids.split('-').map(x => parseInt(x, 10)),
                 nodeStarts,
@@ -573,6 +576,8 @@ type ApiSearchResult = {
     results: {
         sentid: string,
         sentence: string,
+        /** GCND */
+        sentence2: string,
         prevs: string,
         nexts: string,
         ids: string,
@@ -629,9 +634,12 @@ export interface Hit {
     fileId: string;
     /** The basic sentence this hit was found in, extracted from its xml. */
     sentence: string;
+    /** Alternate sentence (GCND) */
+    sentence2: string;
     previousSentence: string;
     nextSentence: string;
     highlightedSentence: SafeHtml;
+    highlightedSentence2: SafeHtml;
     /* The XML of the matched portion of the sentence, does not always contain the full xml! */
     treeXml: string;
     /** The ids of the matching nodes */

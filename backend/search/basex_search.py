@@ -94,11 +94,13 @@ def generate_xquery_search(basex_db: str, xpath: str, variables=None) -> str:
         raise ValueError('Incorrect database or malformed XPath given')
     variables_let_fragment, variables_return_fragment = \
         generate_xquery_for_variables(variables)
+
     query = 'for $node in db:open("' + basex_db + '")/treebank' \
             + xpath + \
             ' let $tree := ($node/ancestor::alpino_ds)' \
             ' let $sentid := ($tree/@id)' \
             ' let $sentence := ($tree/sentence)' \
+            ' let $sentence2 := (string-join($tree//@word_zv, " "))' \
             ' let $ids := ($node//@id)' \
             ' let $indexs := (distinct-values($node//@index))' \
             ' let $indexed := ($tree//node[@index=$indexs])' \
@@ -106,7 +108,7 @@ def generate_xquery_search(basex_db: str, xpath: str, variables=None) -> str:
             ' let $beginlist := (distinct-values($begins))' \
             ' let $meta := ($tree/metadata/meta)' + \
             variables_let_fragment + \
-            ' return <match>{data($sentid)}||{data($sentence)}' \
+            ' return <match>{data($sentid)}||{data($sentence)}||{data($sentence2)}' \
             '||{string-join($ids, \'-\')}||' \
             '{string-join($beginlist, \'-\')}||{$node}||{$meta}' \
             '||' + variables_return_fragment + '||' + \
@@ -211,7 +213,7 @@ def parse_search_result(result_str: str, component) -> List[Result]:
                              'is not closed in {}'.format(result))
         splitted = result.split('||')
         try:
-            (sentid, sentence, ids, begins, xml_sentences, meta,
+            (sentid, sentence, sentence2, ids, begins, xml_sentences, meta,
              variables, database) = splitted
         except ValueError as err:
             raise ValueError('Cannot parse XQuery result: {}'.format(err))
@@ -222,6 +224,7 @@ def parse_search_result(result_str: str, component) -> List[Result]:
         matches.append(Result(BaseXMatch(
             sentid=sentid,
             sentence=sentence,
+            sentence2=sentence2,
             ids=ids,
             begins=begins,
             xml_sentences=xml_sentences,
