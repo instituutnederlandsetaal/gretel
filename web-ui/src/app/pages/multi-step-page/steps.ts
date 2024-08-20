@@ -5,7 +5,7 @@ import { AlpinoService } from '../../services/alpino.service';
 import { TreebankLookup, TreebankService } from '../../services/treebank.service';
 import { FilterValues, SearchVariable, NotificationService, MweQuerySet, MweQuery, StateService } from '../../services/_index';
 import { Treebank, TreebankComponents, TreebankSelection } from '../../treebank';
-import { first, mergeMap, tap, map, from, takeUntil, race, of, mapTo, Observable, filter } from 'rxjs';
+import { first, mergeMap, tap, map, from, takeUntil, race, of, mapTo, Observable, filter, switchMap, combineLatest } from 'rxjs';
 
 /**
  * Contains all the steps that are used in the xpath search
@@ -322,6 +322,7 @@ class ResultsStep<T extends GlobalState> extends Step<T> {
 
 class SelectTreebankStep<T extends GlobalState> extends Step<T> {
     type = StepType.SelectTreebanks;
+    subscribed = false;
 
     constructor(public number: number, protected treebankService: TreebankService, private stateService: StateService<T>) {
         super(number);
@@ -335,7 +336,7 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
     async enterStep(state: T) {
         return new Promise<T>((resolve, reject) => {
             state.currentStep = this;
-            const flattenTreebanks = (tb: TreebankLookup): Treebank[] => Object.values(tb).flatMap(d => Object.values(d));
+            const flattenTreebanks = (tb: TreebankLookup): Treebank[] => Object.values(tb.data).flatMap(d => Object.values(d));
 
             const tooManyTreebanks: Observable<null> = this.treebankService.treebanks
                 .pipe(
@@ -373,10 +374,17 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
                             }
                         }
                     }
+
+                     // Wait until the state has fully finished transitioning
+                    // Then if we're the one that's active, go to the next step
+                    combineLatest([this.stateService.isTransitioning$, this.stateService.state$])
+                    .pipe(filter(([isTransitioning, state]) => !isTransitioning && state.currentStep.number === this.number), first())
+                    .subscribe(([_, state]) => {
+                        this.stateService.next();
+                    })
                 }
+
                 state.valid = state.selectedTreebanks.hasAnySelection();
-                // oof, this is a hack but we need to prevent an infinite recursion
-                setTimeout(() => this.stateService.next(), 0);
                 resolve(state);
             });
         })
@@ -384,6 +392,11 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
 
     leaveStep(state: T) {
         return state;
+    }
+
+
+    private subscribeToTreebanks(state: T) {
+        
     }
 }
 
