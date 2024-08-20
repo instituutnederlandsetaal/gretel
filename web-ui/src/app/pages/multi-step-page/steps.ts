@@ -3,7 +3,7 @@ import { ExtractinatorService, ReconstructorService, PathVariable } from 'lassy-
 import { DefaultTokenAttributes, TokenAttributes } from '../../models/matrix';
 import { AlpinoService } from '../../services/alpino.service';
 import { TreebankLookup, TreebankService } from '../../services/treebank.service';
-import { FilterValues, SearchVariable, NotificationService, MweQuerySet, MweQuery } from '../../services/_index';
+import { FilterValues, SearchVariable, NotificationService, MweQuerySet, MweQuery, StateService } from '../../services/_index';
 import { Treebank, TreebankComponents, TreebankSelection } from '../../treebank';
 import { first, mergeMap, tap, map, from, takeUntil, race, of, mapTo, Observable, filter } from 'rxjs';
 
@@ -323,7 +323,7 @@ class ResultsStep<T extends GlobalState> extends Step<T> {
 class SelectTreebankStep<T extends GlobalState> extends Step<T> {
     type = StepType.SelectTreebanks;
 
-    constructor(public number: number, protected treebankService: TreebankService) {
+    constructor(public number: number, protected treebankService: TreebankService, private stateService: StateService<T>) {
         super(number);
     }
 
@@ -375,6 +375,8 @@ class SelectTreebankStep<T extends GlobalState> extends Step<T> {
                     }
                 }
                 state.valid = state.selectedTreebanks.hasAnySelection();
+                // oof, this is a hack but we need to prevent an infinite recursion
+                setTimeout(() => this.stateService.next(), 0);
                 resolve(state);
             });
         })

@@ -49,7 +49,7 @@ export class XpathSearchComponent extends MultiStepPageDirective<GlobalState> im
             step: new XpathInputStep(0),
             name: 'XPath'
         }, {
-            step: new SelectTreebankStep(1, this.treebankService),
+            step: new SelectTreebankStep(1, this.treebankService, this.stateService),
             name: 'Treebanks'
         }, {
             step: new ResultsStep(2),

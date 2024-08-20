@@ -112,7 +112,7 @@ export class ExampleBasedSearchComponent extends MultiStepPageDirective<GlobalSt
         },
         {
             name: 'Treebanks',
-            step: new SelectTreebankStep(3, this.treebankService)
+            step: new SelectTreebankStep(3, this.treebankService, this.stateService)
         },
         {
             name: 'Results',

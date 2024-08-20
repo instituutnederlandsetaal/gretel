@@ -79,7 +79,7 @@ export class MultiWordExpressionsComponent extends MultiStepPageDirective<MweSta
         },
         {
             name: 'Treebanks',
-            step: new SelectTreebankStep(1, this.treebankService)
+            step: new SelectTreebankStep(1, this.treebankService, this.stateService)
         },
         {
             step: new MweResultsStep(2, this.mweService, this.notificationService),
