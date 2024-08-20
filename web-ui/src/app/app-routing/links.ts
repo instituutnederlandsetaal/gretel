@@ -20,14 +20,14 @@ const links: Link[] = [
         name: 'XPath Search',
         link: '/xpath-search',
     },
-    {
-        name: 'Multiword Expressions',
-        link: '/mwe-search',
-    },
-    {
-        name: 'Upload',
-        link: '/upload-treebank',
-    },
+    // {
+    //     name: 'Multiword Expressions',
+    //     link: '/mwe-search',
+    // },
+    // {
+    //     name: 'Upload',
+    //     link: '/upload-treebank',
+    // },
     {
         name: 'About',
         link: '/about',
