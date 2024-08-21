@@ -100,7 +100,7 @@ def generate_xquery_search(basex_db: str, xpath: str, variables=None) -> str:
             ' let $tree := ($node/ancestor::alpino_ds)' \
             ' let $sentid := ($tree/@id)' \
             ' let $sentence := ($tree/sentence)' \
-            ' let $sentence2 := (string-join($tree//@word_zv, " "))' \
+            ' let $sentence2 := (string-join(for $dialectnode in $tree//node[@dialect_word] order by $dialectnode/@start return $dialectnode/@dialect_word, " "))' \
             ' let $ids := ($node//@id)' \
             ' let $indexs := (distinct-values($node//@index))' \
             ' let $indexed := ($tree//node[@index=$indexs])' \
