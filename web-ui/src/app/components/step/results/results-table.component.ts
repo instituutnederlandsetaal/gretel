@@ -100,8 +100,8 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
     }> = [
         { field: 'number', header: '#', width: '5%' },
         { field: 'fileId', header: 'ID', width: '20%' },
-        // { field: 'blacklabLink', header: 'BlackLab', width: '5%' },
         { field: 'componentDisplayName', header: 'Component', width: '20%' },
+        { field: 'blacklabUrl', header: 'View in BlackLab', width: '5%' },
         { field: 'highlightedSentence', header: 'Sentence', width: '20%' },
         { field: 'highlightedSentence2', header: 'Dialect', width: '20%' },
     ];
@@ -171,6 +171,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
                 highlightedSentence2: hit.highlightedSentence2,
                 previousSentence: hit.previousSentence,
                 nextSentence: hit.nextSentence,
+                blacklabUrl: `https://gcnd.ato.ivdnt.org/corpus-frontend/GCND_mei/docs/${hit.metaValues.docpid}/?query=${encodeURIComponent(`<s id="${hit.metaValues.sentence_id}"/>`)}`
             }));
         }
     }
