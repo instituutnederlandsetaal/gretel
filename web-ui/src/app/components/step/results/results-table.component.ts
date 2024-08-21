@@ -100,7 +100,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
     }> = [
         { field: 'number', header: '#', width: '5%' },
         { field: 'fileId', header: 'ID', width: '20%' },
-        { field: 'componentDisplayName', header: 'Component', width: '20%' },
+        { field: 'doctitle', header: 'Document', width: '20%' },
         { field: 'blacklabUrl', header: 'View in BlackLab', width: '5%' },
         { field: 'highlightedSentence', header: 'Sentence', width: '20%' },
         { field: 'highlightedSentence2', header: 'Dialect', width: '20%' },
