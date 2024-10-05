@@ -97,7 +97,7 @@ def generate_xquery_search(basex_db: str, xpath: str, variables=None) -> str:
 
     query = 'for $node in db:open("' + basex_db + '")/treebank' \
             + xpath + \
-            ' let $tree := ($node/ancestor::alpino_ds)' \
+            ' let $tree := ($node/ancestor-or-self::alpino_ds)' \
             ' let $sentid := ($tree/@id)' \
             ' let $sentence := ($tree/sentence)' \
             ' let $sentence2 := (string-join(for $dialectnode in $tree//node[@dialect_word] order by $dialectnode/@begin return $dialectnode/@dialect_word, " "))' \
