@@ -29,7 +29,7 @@
         </div>
         <p class="version">
             <em>Version: <span [pTooltip]="buildTime">{{version}}</span></em>&nbsp;
-            <a routerLink="/about#credits" class="about-link"><fa-icon [icon]="faLink"></fa-icon> About</a>
+            <a [routerLink]="['/about']" fragment="credits" class="about-link"><fa-icon [icon]="faLink"></fa-icon> About</a>
         </p>
     </div>
 </footer>
