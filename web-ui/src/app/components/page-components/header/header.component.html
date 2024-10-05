@@ -1,14 +1,21 @@
 <nav class="navbar is-primary is-hidden-print">
     <div class="container">
-
         <div class="navbar-brand">
-            <a [routerLink]="['/home']" class="navbar-item">
-                <span tooltipPosition="down-left"
-                    pTooltip="Greedy Extraction of Trees for Empirical Linguistics">GrETEL</span> <sup
-                    class="version">5</sup>
+            <a [routerLink]="['/home']" class="navbar-item logo-and-title" style="position: relative; ">
+                <div class="logo-popout">
+                    <img src="assets/logo_gcnd.png" alt="Logo">
+                </div>
+
+                <span tooltipPosition="down-left" pTooltip="Greedy Extraction of Trees for Empirical Linguistics">GrETEL</span>
+                <sup class="version">5</sup>
             </a>
-            <a role="button" class="navbar-burger" aria-label="menu" [attr.aria-expanded]="menuExpanded"
-                [ngClass]="{'is-active':menuExpanded}" (click)="menuExpanded=!menuExpanded">
+            <a role="button"
+                class="navbar-burger"
+                aria-label="menu"
+                [attr.aria-expanded]="menuExpanded"
+                [ngClass]="{'is-active':menuExpanded}"
+                (click)="menuExpanded=!menuExpanded"
+            >
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>

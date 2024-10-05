@@ -23,6 +23,28 @@
     z-index: 201;
 }
 
+
+.navbar-brand {
+    flex-wrap: nowrap;
+    flex-direction: row;
+
+    .logo-popout {
+        width: auto;
+        height: 10px;
+        overflow: visible;
+        align-self: flex-start;
+        padding-right: 0.75rem;
+
+
+        img {
+            flex: none;
+            width: auto;
+            height: 75px;
+            max-height: unset;
+            border: 1px solid #ccc;
+        }
+    }
+}
 .notification {
     overflow: hidden;
     position: sticky;
