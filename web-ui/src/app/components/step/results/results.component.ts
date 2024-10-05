@@ -169,6 +169,9 @@ export class ResultsComponent extends StepDirective<GlobalState> implements OnIn
                         }
                         case 'finish': {
                             this.loading = false;
+                            if (this.filteredResults.length === 1) {
+                                this.showTree(this.filteredResults[0]);
+                            }
                             break;
                         }
                     }
