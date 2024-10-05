@@ -1,23 +1,80 @@
-.logo-wrapper {
-    float: right;
-    width: 200px;
-    max-width: 100%;
-}
+@import "bulma/sass/utilities/mixins";
 
-.centre-logo {
-    display: inline-block;
-    width: 450px;
-    max-width: calc(100vw - 7rem);
+.footer {
+    padding-bottom: 1.5rem;
 }
-
-.lab-logo {
-    // add padding to give it the same size as the university logo (LAB logo is 10px lower)
-    background-color: #3273dc;
-    padding: 5px;
-    width: 210px;
-}
-
 
 .version {
     line-height: 3em;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.columns {
+    position: relative;
+    // justify-content: center;
+    align-items: flex-end;
+}
+
+.column.logo {
+    flex-basis: auto;
+    flex-grow: 0;
+    flex-shrink: 1;
+
+    // Ugly way to do it but it works
+    @include mobile {
+        flex-basis: 100%!important;
+        justify-content: flex-start!important;
+        margin-bottom: 1rem!important;
+        &.logo-gretel {
+            align-items: flex-start!important;
+        }
+        &:not(.logo-gretel) {
+            padding-left: 20px;
+        }
+    }
+
+    justify-content: flex-start;
+    align-items: center;
+    display: flex;
+
+    padding: 0;
+    &:not(:last-child) {
+        padding-right: 1.5rem;
+    }
+
+    a {
+        line-height: 0;
+        display: block;
+        font-size: 0;
+    }
+    img {
+        min-width: 100px;
+        max-height: 100px;
+        transform-origin: 0 50%;
+    }
+
+    &.logo-gretel {
+        flex-direction: column;
+        .title {
+            white-space: nowrap;
+        }
+    }
+
+    &.logo-ugent {
+        img {
+            transform: scale(1.25) translateX(-20%) translateY(13%);
+        }
+    }
+    &.logo-uu {
+        img {
+            transform: scale(0.9);
+        }
+    }
+    &.logo-int {
+        img {
+            // transform: scale(1.2);
+        }
+    }
 }
