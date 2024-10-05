@@ -1,19 +1,22 @@
 <nav class="navbar is-primary is-hidden-print">
-    <div class="navbar-brand">
-        <a [routerLink]="['/home']" class="navbar-item">
-            <span tooltipPosition="bottom"
-                pTooltip="Greedy Extraction of Trees for Empirical Linguistics">GrETEL</span> <sup
-                class="version">5</sup>
-        </a>
-        <a role="button" class="navbar-burger" aria-label="menu" [attr.aria-expanded]="menuExpanded"
-            [ngClass]="{'is-active':menuExpanded}" (click)="menuExpanded=!menuExpanded">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
+    <div class="container">
+
+        <div class="navbar-brand">
+            <a [routerLink]="['/home']" class="navbar-item">
+                <span tooltipPosition="down-left"
+                    pTooltip="Greedy Extraction of Trees for Empirical Linguistics">GrETEL</span> <sup
+                    class="version">5</sup>
+            </a>
+            <a role="button" class="navbar-burger" aria-label="menu" [attr.aria-expanded]="menuExpanded"
+                [ngClass]="{'is-active':menuExpanded}" (click)="menuExpanded=!menuExpanded">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <grt-navigation class="navbar-menu" [ngClass]="{'is-active':menuExpanded}">
+        </grt-navigation>
     </div>
-    <grt-navigation class="navbar-menu" [ngClass]="{'is-active':menuExpanded}">
-    </grt-navigation>
 </nav>
 <div class="notification is-radiusless" *ngIf="show" [ngClass]="messageType" [@slideDown]>
     <button *ngIf="!progress" class="delete" (click)="show=false"></button>
