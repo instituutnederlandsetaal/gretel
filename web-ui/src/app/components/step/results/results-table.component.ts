@@ -172,7 +172,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<
                 previousSentence: hit.previousSentence,
                 nextSentence: hit.nextSentence,
                 // HACK: latest data has wrong pids.
-                blacklabUrl: `https://gcnd.ato.ivdnt.org/corpus-frontend/GCND_hackathon/docs/${hit.metaValues.doctitle.substring(0, hit.metaValues.doctitle.indexOf(':'))}/?query=${encodeURIComponent(`<s id="${hit.metaValues.sentence_id}"/>`)}`
+                blacklabUrl: `https://gcnd.ivdnt.org/gcnd-frontend/GCND/docs/${hit.metaValues.doctitle.substring(0, hit.metaValues.doctitle.indexOf(':'))}/?query=${encodeURIComponent(`<s id="${hit.metaValues.sentence_id}"/>`)}`
             }));
         }
     }
