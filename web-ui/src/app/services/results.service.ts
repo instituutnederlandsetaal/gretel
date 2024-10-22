@@ -427,7 +427,7 @@ export class ResultsService {
                 previousSentence,
                 nextSentence,
                 highlightedSentence: this.highlightSentence(sentence, nodeStarts, 'strong'),
-                highlightedSentence2: this.highlightSentence(sentence2 || '', nodeStarts, 'strong'),
+                highlightedSentence2: sentence2, // removed for now. Sometimes sentence doesn't align cleanly and node indexes are off.
                 treeXml: result.xml_sentences,
                 nodeIds: result.ids.split('-').map(x => parseInt(x, 10)),
                 nodeStarts,
