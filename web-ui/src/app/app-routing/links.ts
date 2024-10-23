@@ -13,6 +13,11 @@ const links: Link[] = [
         link: '/home',
     },
     {
+        name: 'BlackLab Search',
+        link: 'https://gcnd.ivdnt.org/',
+        external: true,
+    },
+    {
         name: 'Example-based Search',
         link: '/example-based-search',
     },
