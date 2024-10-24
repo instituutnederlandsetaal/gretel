@@ -13,17 +13,17 @@ const links: Link[] = [
         link: '/home',
     },
     {
-        name: 'BlackLab Search',
-        link: 'https://gcnd.ivdnt.org/',
-        external: true,
-    },
-    {
         name: 'Example-based Search',
         link: '/example-based-search',
     },
     {
         name: 'XPath Search',
         link: '/xpath-search',
+    },
+    {
+        name: 'BlackLab Search',
+        link: 'https://gcnd.ivdnt.org/',
+        external: true,
     },
     // {
     //     name: 'Multiword Expressions',
