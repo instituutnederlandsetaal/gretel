@@ -45,8 +45,8 @@ services:
     container_name: gretel-frontend
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-frontend:${version:-latest}
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: frontend
     ports: 
       - 80:80
@@ -62,8 +62,8 @@ services:
     container_name: gretel-backend
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-backend:${version:-latest}
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: backend
     environment: 
       REDIS_HOST: redis
@@ -88,8 +88,8 @@ services:
     container_name: gretel-backend
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-backend:${version:-latest}-dev
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: backend
   
     environment: 
@@ -117,8 +117,8 @@ services:
     container_name: gretel-celery
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-backend:${version:-latest}
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: backend
     # Same env as backend as we are basically a duplicate
     environment: 
@@ -140,8 +140,8 @@ services:
     container_name: gretel-celery
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-backend:${version:-latest}-dev
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: backend
     volumes: 
       - ../../backend:/app/backend
@@ -179,8 +179,8 @@ services:
       - dev
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-basex:${version:-latest}-dev
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile.basex
+      context: ..
+      dockerfile: docker/Dockerfile.basex
     volumes:
       - ../../backend/basex-data:/data
     restart: unless-stopped
@@ -193,8 +193,8 @@ services:
       - ""
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-basex:${version:-latest}
     build: 
-      context: ../..
-      dockerfile: docker/production/Dockerfile.basex
+      context: ..
+      dockerfile: docker/Dockerfile.basex
     volumes:
       - gretel-basex:/data
     restart: unless-stopped

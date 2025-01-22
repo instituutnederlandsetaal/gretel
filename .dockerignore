@@ -4,9 +4,9 @@
 
 requirements.txt
 
-docker/production/docker-compose.yml
-docker/production/Dockerfile
-docker/production/Dockerfile.basex
+docker/docker-compose.yml
+docker/Dockerfile
+docker/Dockerfile.basex
 
 README.md
 

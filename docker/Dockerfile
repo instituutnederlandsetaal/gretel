@@ -77,7 +77,7 @@ RUN python manage.py collectstatic --noinput
 FROM nginx:1.27-alpine as frontend
 
 # Copy the nginx configuration file.
-COPY docker/production/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the static files from the staticfiles stage to the nginx directory.
 COPY --from=staticfiles-backend /app/static /app/
