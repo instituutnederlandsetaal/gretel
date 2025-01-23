@@ -1,5 +1,5 @@
 {
     "providers": {
     },
-    "django": "http://localhost:8000/"
+    "django": "/"
 }

@@ -36,9 +36,6 @@ version: "3"
 # - by configuring the "django" url in the "config.json" file in the web-ui directory
 # - by using the included "proxy.json" file in the web-ui directory. This option requires that the abovementioned "django" url in the "config.json" file is set to "/" (i.e. localhost:4200, where the proxy will also run).
 
-
-
-
 services:
 
   frontend: 

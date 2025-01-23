@@ -85,7 +85,6 @@ export class UploadService {
                 retries++;
                 intervalMs = 2500;
                 const response = await lastValueFrom(this.http.get<UploadProgressResponse>(url, {withCredentials: true, responseType: 'json'}));
-                debugger;
                 if (response.status === 'PENDING') {
                     intervalMs = 10000;
                     const elapsedSeconds = Math.round((new Date().getTime() - start) / 1000);
@@ -127,8 +126,10 @@ export class UploadService {
         isPublic?: boolean,
     }): Observable<UploadStreamEvent>  {
         const formData = new FormData();
+
+        const id = params.treebankName.trim().replace(/[^a-zA-Z0-9_]/g, '_')
         // See upload/serializers.py for the expected fields.
-        formData.set('name', params.treebankName);
+        formData.set('name', id);
         formData.set('title', params.treebankName);
         formData.set('description', params.treebankDescription);
         formData.set('url_more_info', params.treebankHelpUrl);
@@ -138,7 +139,7 @@ export class UploadService {
         
         const upload$ = new ReplaySubject<UploadStreamEvent>();
 
-        this.configurationService.getDjangoUrl(`upload/create/${params.treebankName}/`)
+        this.configurationService.getDjangoUrl(`upload/create/${id}/`)
         .then(url => new HttpRequest('POST', url, formData, {
             withCredentials: true,
             reportProgress: true

@@ -35,6 +35,7 @@ venv.bak/
 celerybeat-schedule*
 query_result_cache/*
 
-# corpora, search cache
+# Uploads, corpora, search cache
 basex-data/
+uploaded_treebanks/
 query_result_cache/

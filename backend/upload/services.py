@@ -313,7 +313,7 @@ class UploadProcessService:
 
         # Use local-name() so that any namespace prefixes are ignored
         for sentence in root.xpath('//alpino_ds'):
-            sentence.set('id', f'{component_slug}:${file_id}:{len(sentences)}')
+            sentence.set('id', f'{component_slug}:{file_id}:{len(sentences)}')
             sentence_root = sentence.xpath('.//node[@cat="top"]/@end')
             # Rarely might encounter a sentence where the root has no start or end attributes.
             # In that case, try counting the words manually.

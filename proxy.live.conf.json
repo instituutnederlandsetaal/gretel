@@ -31,7 +31,7 @@
         "target": "https://gretel5.hum.uu.nl/",
         "changeOrigin": true
     },
-    "/auth": {
+    "/auth/": {
         "target": "https://gretel5.hum.uu.nl/",
         "changeOrigin": true
     }
