@@ -1,5 +1,5 @@
 import * as $ from 'jquery';
-import { Injectable } from '@angular/core';
+import { Injectable, SecurityContext } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -253,13 +253,13 @@ export class ResultsService {
             data,
             httpOptions
         ));
-        return this.highlightSentenceNodes(response.tree, nodeIds);
+        return this.highlightSentenceNodes(response.tree, nodeIds.filter(n => !isNaN(Number(n))));
     }
 
     /** adds a "highlight=yes" attribute to all nodes with ID, and their descendants. */
     public highlightSentenceNodes(treeXml: string, nodeIds: Array<string | number>): string {
         const doc = $.parseXML(treeXml);
-        const highlightNodes = Array.from(doc.querySelectorAll(nodeIds.map(id => `node[id="${id}"]`).join(',')));
+        const highlightNodes = Array.from(doc.querySelectorAll(nodeIds.map(id => `node[id="${id}"]`).join(',') || 'node'));
         const highlightDescendants = highlightNodes
             .filter(n => n.hasAttribute('index'))
             .flatMap(n => Array.from(n.querySelectorAll(`node[index="${n.getAttribute('index')}"]`)));
@@ -535,7 +535,7 @@ export class ResultsService {
             next = $groups[3];
         }
 
-        const words = sentence.split(' ');
+        const words = sentence.split(/\s+/g).filter(w => w.length);
 
         // Instead of wrapping each individual word in a tag, merge sequences
         // of words in one <tag>...</tag>
@@ -558,7 +558,7 @@ export class ResultsService {
             highlightedSentence = prev + ' ' + highlightedSentence + ' ' + next;
         }
 
-        return this.sanitizer.bypassSecurityTrustHtml(highlightedSentence);
+        return this.sanitizer.sanitize(SecurityContext.HTML, highlightedSentence);
     }
 }
 
