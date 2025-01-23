@@ -128,28 +128,42 @@
         </div>
     </div>
     <div class="column" [ngClass]="{'has-highlight-background': hasHighlightBackground}">
-        <p-table *ngIf="filteredResults.length > hiddenCount else warning" [columns]="columns" [value]="filteredResults"
-            [resizableColumns]="true" responsiveLayout="stack" styleClass="bulma">
+        <p-table *ngIf="filteredResults.length > hiddenCount else warning" [columns]="selectedColumns" [value]="processedHits"
+            [resizableColumns]="false" responsiveLayout="stack" styleClass="bulma"
+            column
+        >
+            <ng-template pTemplate="caption">
+                <p-multiSelect
+                    display="chip"
+                    [options]="columns"
+                    [(ngModel)]="selectedColumns"
+                    optionLabel="header"
+                    selectedItemsLabel="{0} columns selected"
+                    [style]="{'min-width': '200px'}"
+                    placeholder="Choose Columns"
+                    styleClass="bulma"
+                />
+            </ng-template>
+
             <ng-template pTemplate="header" let-columns>
                 <tr>
-                    <th *ngFor="let col of columns" pResizableColumn [style.width]="col.width">
+                    <th *ngFor="let col of columns"  [style.width]="col.width">
                         {{col.header}}
                     </th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-rowData let-columns="columns" let-i="rowIndex">
                 <tr *ngIf="!rowData.hidden" [@fade]>
-                    <td *ngFor="let col of columns" class="p-resizable-column">
+                    <td *ngFor="let col of columns;" class="p-resizable-column">
                         <span *ngIf="col.field !== 'highlightedSentence'" class="p-column-title">{{col.header}}</span>
                         <ng-container [ngSwitch]="col.field">
                             <span *ngSwitchCase="'number'">{{i + 1}}</span>
 
                             <ng-container *ngSwitchCase="'fileId'">
                                 <a *ngIf="rowData[col.field]; else fileIdButton"
-                                    (click)="showTree.emit(rowData)">{{rowData[col.field].split('/').pop()}}</a>
+                                    (click)="showTree.emit(filteredResults[i])">{{rowData[col.field].split('/').pop()}}</a>
                                 <ng-template #fileIdButton>
-                                    <button type="button" class="button" (click)="showTree.emit(rowData)">Show
-                                        tree</button>
+                                    <button type="button" class="button" (click)="showTree.emit(filteredResults[i])">Show tree</button>
                                 </ng-template>
                             </ng-container>
 

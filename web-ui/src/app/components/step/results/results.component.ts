@@ -186,7 +186,7 @@ export class ResultsComponent extends StepDirective<GlobalState> implements OnIn
                         case NotificationKind.NEXT: {
                             // some new hits!
                             const [newHits, newHidden] = this.hideHits(r.result.value.hits);
-                            this.filteredResults.push(...newHits);
+                            this.filteredResults = [...this.filteredResults, ...newHits];
                             this.hiddenCount += newHidden;
 
                             // Update the counts

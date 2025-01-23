@@ -18,6 +18,8 @@ import {
 } from '../../../services/_index';
 import { GlobalState } from '../../../pages/multi-step-page/steps';
 import { Filter } from '../../../models/filter';
+import { OnTypedChanges, TypedChanges } from '../../util';
+import { SafeHtml } from '@angular/platform-browser';
 
 const DebounceTime = 200;
 
@@ -27,7 +29,7 @@ const DebounceTime = 200;
     templateUrl: './results-table.component.html',
     styleUrls: ['./results-table.component.scss'],
 })
-export class ResultsTableComponent implements OnInit, OnDestroy {
+export class ResultsTableComponent implements OnInit, OnDestroy, OnTypedChanges<{filteredResults: HitWithOrigin[]}> {
     faBars = faBars;
     faChevronLeft = faChevronLeft;
     faChevronRight = faChevronRight;
@@ -44,7 +46,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
     public loadingDownload = true;
 
     @Input()
-    public filteredResults = [];
+    public filteredResults: HitWithOrigin[] = [];
 
     @Input()
     /**
@@ -91,12 +93,21 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
     public hasHighlightBackground = false;
     private subscriptions: Subscription[];
 
-    public columns = [
+    public defaultColumns: Array<{
+        field: string[]|string;
+        header: string;
+        width: string;
+    }> = [
         { field: 'number', header: '#', width: '5%' },
         { field: 'fileId', header: 'ID', width: '20%' },
         { field: 'componentDisplayName', header: 'Component', width: '20%' },
         { field: 'highlightedSentence', header: 'Sentence', width: 'fill' },
     ];
+    
+    public columns = this.defaultColumns.concat();
+    public selectedColumns = this.defaultColumns.concat();
+
+    public processedHits: Array<Record<string, string|SafeHtml>> = [];
 
     constructor(
         ngZone: NgZone,
@@ -135,6 +146,32 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
 
+    ngOnChanges(changes: TypedChanges<{ filteredResults: HitWithOrigin[]; }>): void {
+        if (changes.filteredResults) {
+            const extraColumns: Record<string, (typeof this.columns)[number]> = {};
+
+            for (const h of changes.filteredResults.currentValue) {
+                for (const key of Object.keys(h.metaValues)) {
+                    if (extraColumns[key]) continue;
+                    extraColumns[key] = { field: key, header: key, width: 'fill' };
+                }
+            }
+
+            this.columns = this.defaultColumns.concat(Object.values(extraColumns));
+            this.selectedColumns = this.selectedColumns.filter(c => {
+                return this.columns.some(col => col.field === c.field);
+            })
+        
+            this.processedHits = changes.filteredResults.currentValue.map(hit => ({
+                ...hit.metaValues,
+                fileId: hit.fileId,
+                componentDisplayName: hit.componentDisplayName,
+                highlightedSentence: hit.highlightedSentence,
+                previousSentence: hit.previousSentence,
+                nextSentence: hit.nextSentence,
+            }));
+        }
+    }
 
     public filterChange(filterValues: FilterValues) {
         this.changeFilterValues.next(filterValues);
@@ -255,6 +292,7 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
                     maxValue: item.maxValue,
                     options
                 };
-            });
+            })
+            .filter(f => f.options.length <= 250);
     }
 }
