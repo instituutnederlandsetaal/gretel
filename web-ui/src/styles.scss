@@ -134,3 +134,16 @@ $scrollbar-width: 0.75em;
         }
     }
 }
+
+
+body,
+grt-root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex-grow: 1;
+}
+
