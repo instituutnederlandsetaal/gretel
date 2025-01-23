@@ -54,7 +54,7 @@ var jQuery = require('jquery');
             // Close fullscreen if a user clicks on an empty area
             FS.on("click", function (e) {
                 var target = $(e.target);
-                if (!target.closest(".tv-error, .tv-content-wrapper").length) {
+                if (!target.closest(".tv-error, .tv-content-wrapper").length && !target.closest('button').length) {
                     closeFullscreen();
                 }
             });

@@ -134,7 +134,8 @@ export class TreeVisualizerComponent implements OnChanges, OnInit, AfterViewChec
         if (this.tree && this.metadataCard) {
             // make sure the metadata overview doesn't overflow
             $(this.metadataCard.nativeElement).css({
-                maxHeight: $(this.tree.nativeElement).outerHeight()
+                maxHeight: $(this.tree.nativeElement).outerHeight(),
+                overflow: 'auto',
             });
         }
     }
