@@ -43,6 +43,10 @@ services:
 
   frontend: 
     container_name: gretel-frontend
+    profiles: 
+      - production
+      - prod
+      - ""
     image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-frontend:${version:-latest}
     build: 
       context: ..
@@ -50,6 +54,24 @@ services:
       target: frontend
     ports: 
       - 80:80
+    restart: unless-stopped
+
+  frontend-dev:
+    profiles: 
+      - development
+      - dev
+    container_name: gretel-frontend
+    image: ${REGISTRY:-instituutnederlandsetaal}/gretel5-frontend:${version:-latest}-dev
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile.frontend-live
+    ports:
+      - 4200:4200
+    volumes:
+      - ../web-ui:/app/web-ui
+      - /app/web-ui/node_modules # overwrite build cache from host system with local 
+      - /app/web-ui/dist # overwrite build cache from host system with local 
+      - /app/web-ui/.angular # overwrite build cache from host system with local 
     restart: unless-stopped
 
   # Backend
@@ -100,7 +122,7 @@ services:
       - 5678:5678
       - 8000:8000
     volumes: 
-      - ../../backend:/app/backend
+      - ../backend:/app/backend
     # need to run migrations (which inits db) because we overwrite the database file with the volume.
     command: bash -c "
       python manage.py migrate && 
@@ -144,7 +166,7 @@ services:
       dockerfile: docker/Dockerfile
       target: backend
     volumes: 
-      - ../../backend:/app/backend
+      - ../backend:/app/backend
     # Same env as backend as we are basically a duplicate
     environment: 
       REDIS_HOST: redis
@@ -182,7 +204,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.basex
     volumes:
-      - ../../backend/basex-data:/data
+      - ../backend/basex-data:/data
     restart: unless-stopped
 
   basex:

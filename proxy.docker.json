@@ -1,0 +1,31 @@
+{
+    "_comment": "This proxy is mounted in the web-ui development container. The paths refer to the backend dev container in the docker network, as seen from the frontend container",
+    "/api": {
+        "target": "http://gretel-backend:8000",
+        "secure": false
+    },
+    "/admin": {
+        "target": "http://gretel-backend:8000",
+        "secure": false
+    },
+    "/static": {
+        "target": "http://gretel-backend:8000",
+        "secure": false
+    },
+    "/mwe/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
+    },
+    "/parse/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
+    },
+    "/search/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
+    },
+    "/treebanks/": {
+        "target": "http://gretel-backend:8000/",
+        "secure": false
+    }
+}

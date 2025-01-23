@@ -1,0 +1,16 @@
+# Live serve web-ui container
+# Requires compose to mount the workspace's web-ui directory into /app/web-ui
+
+FROM node:18-alpine
+
+RUN apk add inotify-tools
+
+WORKDIR /app
+
+COPY package.json package.json
+COPY web-ui/package.json web-ui/package.json
+COPY proxy.docker.json proxy.conf.json
+
+EXPOSE 4200
+VOLUME ["/root/.cache/yarn"]
+CMD ["sh", "-c", "yarn fyarn install && yarn fyarn serve-docker"]

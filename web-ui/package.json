@@ -18,7 +18,8 @@
         "serve:nl": "ng serve --proxy-config ../proxy.conf.json --configuration=nl",
         "stop": "lsof -t -i tcp:4200 | xargs kill -9 || echo \"not running\"",
         "test-once": "ng test --watch=false",
-        "watch": "ng build --watch"
+        "watch": "ng build --watch",
+        "serve-docker": "ng serve --host 0.0.0.0 --disable-host-check --proxy-config ../proxy.conf.json --poll 1000"
     },
     "private": true,
     "dependencies": {
