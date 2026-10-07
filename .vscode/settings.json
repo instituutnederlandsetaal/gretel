@@ -1,7 +1,5 @@
 {
-	"python.analysis.extraPaths": [
-		"backend/**"
-	],
+	"python.analysis.extraPaths": ["backend"],
 	"python.analysis.autoFormatStrings": true,
 	"python.analysis.diagnosticMode": "workspace",
 	"python.analysis.typeCheckingMode": "standard"

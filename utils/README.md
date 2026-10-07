@@ -49,10 +49,8 @@ runs it will restart from the beginning.
 
 ## Requirements
 
-In addition to the Python 3 standard library, this script requires the following
-to Python package, which can be installed using pip:
-
-- `BaseXClient`
+Run `uv run --locked utils/lassy_to_basex.py TREEBANK_DIRECTORY` from the repository root.
+Its `BaseXClient` dependency is included in the project's locked dependencies.
 
 The script needs a running BaseX server. After installing BaseX, start it using
 the command `basexserver -S`.

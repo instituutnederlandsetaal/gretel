@@ -7,271 +7,179 @@ GrETEL stands for Greedy Extraction of Trees for Empirical Linguistics. It is a 
 
 GrETEL is publicly available at [https://gretel5.hum.uu.nl](https://gretel5.hum.uu.nl)
 
-## Before you start
+## Build and development
 
-You need to install the following software:
+The application consists of a Django backend in `backend/` and an Angular frontend in
+`web-ui/`. The backend uses SQLite. Search and dataset processing also need BaseX,
+Redis, a Celery worker and an Alpino parser.
 
-- PostgreSQL >= 10, client, server and C libraries
-- Python >= 3.10, <= 3.13
-- virtualenv
-- WSGI-compatible webserver (deployment only)
-- [Visual C++ for Python][1] (Windows only)
-- Node.js >= 14.21.2
-- [Yarn](https://yarnpkg.com/)
-- [WebDriver][2] for at least one browser (only for functional testing)
-- [BaseX](https://packages.debian.org/jessie/database/basex)
-- [Alpino](https://www.let.rug.nl/vannoord/alp/Alpino/) dependency parser. It is recommended to use the same version used for creating the treebanks. This way an example based search will result in the same search structure as stored in the database.
-- [Redis](https://redis.io/)
-[1]: https://wiki.python.org/moin/WindowsCompilers
-[2]: https://pypi.org/project/selenium/#drivers
+### Local setup
 
-## How it works
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and the Node.js
+version in `.nvmrc`. uv manages Python 3.13 and the local `.venv`. Node 18 is retained for
+[compatibility with Angular 15](https://angular.dev/reference/versions); a newer Node
+major needs an Angular upgrade. npm is the frontend package manager, and
+`web-ui/package-lock.json` is its dependency lockfile.
 
-This project integrates three isolated subprojects, each inside its own subdirectory with its own code, package dependencies and tests:
-
-- **backend**: the server side web application based on [Django][3] and [DRF][4]
-- **frontend**: the client side web application based on [Angular](https://angular.io)
-- **functional-tests**: the functional test suite based on [Selenium][6] and [pytest][7]
-
-[3]: https://www.djangoproject.com
-[4]: https://www.django-rest-framework.org
-[6]: https://www.selenium.dev/documentation/webdriver/
-[7]: https://docs.pytest.org/en/latest/
-
-Each subproject is configurable from the outside. Integration is achieved using "magic configuration" which is contained inside the root directory together with this README. In this way, the subprojects can stay truly isolated from each other.
-
-If you are reading this README, you'll likely be working with the integrated project as a whole rather than with one of the subprojects in isolation. In this case, this README should be your primary source of information on how to develop or deploy the project. However, we recommend that you also read the "How it works" section in the README of each subproject.
-
-## Development
-
-### Quickstart
-
-First time after cloning this project:
+From the repository root:
 
 ```console
-python bootstrap.py
+nvm install
+nvm use
+npm run setup
 ```
 
-Check or adjust the `backend/gretel/settings.py` to make sure it points to the correct location of the BaseX and Alpino server.
+`npm run setup` syncs the locked Python dependencies, runs `npm ci` in `web-ui/`,
+and applies the Django migrations. It stops on any failure. Set
+`UV_PROJECT_ENVIRONMENT` to choose another Python environment.
 
-Alpino can be started in server mode using:
+Start the frontend and backend in separate terminals:
+
+```console
+npm start
+npm run start-back
+```
+
+Visit <http://localhost:4200/>. The frontend proxies backend routes to
+<http://localhost:8000/>, where the Django admin is available at `/admin/`.
+`npm start` reloads frontend changes and Django's development server reloads
+backend changes. `serve:acc` and `serve:live` in `web-ui/` target the acceptance and
+live backends respectively.
+
+For search and uploads, start BaseX and Redis, then run:
 
 ```console
 ./alpino.sh
+# In another terminal:
+uv run --locked --directory backend celery -A gretel.celery worker --loglevel=info -B
 ```
 
-BaseX server can be started using:
+For a local BaseX server, set its admin password to `admin` to match
+`backend/gretel/settings.py`. The backend defaults to BaseX on port 1984, Alpino
+on port 7001 and Redis on its default port, all on localhost. Set `BASEX_HOST`,
+`ALPINO_HOST` and `REDIS_HOST` when these services run elsewhere. The Docker
+setup below starts all of these services for you.
+
+### Common commands
+
+Run these from the repository root; Python commands use `uv run` without activation:
+
+| Command | Purpose |
+| --- | --- |
+| `npm run install-front` | Install the locked frontend dependencies with `npm ci` |
+| `npm run install-back` | Sync the locked Python runtime and development dependencies |
+| `npm run django -- migrate` | Apply Django migrations |
+| `npm run build` | Build the production frontend into `web-ui/dist/` |
+| `npm test` | Run backend and frontend unit tests |
+| `npm run test-back` | Run the backend tests; BaseX enables the search integration tests |
+| `npm run test-front` | Run the frontend tests once in headless Chrome |
+| `npm run lint-back` | Check Python syntax and undefined names |
+
+Build, serve and test commands generate `web-ui/src/environments/version.ts`
+automatically. Git metadata is used when available; source archives and Docker
+builds also work. Set `BUILD_SHA` and `BUILD_SOURCE_URL` to supply build metadata
+without copying `.git` into a container.
+
+Python dependencies are declared in `pyproject.toml` and pinned in `uv.lock`.
+Development tools (tests, lint and debugpy) belong to the `dev` dependency group;
+production Docker images install only runtime dependencies. Commit both files
+when changing dependencies:
 
 ```console
-basexserver -s
+uv add PACKAGE
+uv add --dev PACKAGE
+uv lock --upgrade-package PACKAGE
 ```
 
-Note that BaseX generates an initial password for the `admin` user when started for the first time. The password 
-has to be passed on to  GrETEL in `backend/gretel/settings.py`. To manually set a password, start the BaseX server 
-with the `-cPASSWORD` option.
+## Docker deployment
 
-Celery (used for running tasks in the background) can be started using:
+Docker Compose 2.24.4 or newer is required for the development override.
+The default Compose file starts Nginx, Gunicorn/Django, Celery with its periodic
+scheduler, BaseX, Redis and Alpino. Only Nginx is exposed to the host in production.
+Django migrations run when the backend starts, before Celery and Nginx start.
+Image builds install the committed dependency pins and never create a database.
+
+### Production
+
+Copy `docker/.env.example` to `docker/.env`, set `DJANGO_SECRET_KEY` to a generated
+secret, and set `DJANGO_ALLOWED_HOSTS` to the hostnames used to access the site.
+Configure SMTP in the same file for login codes, email verification and password
+resets. For HTTPS behind an external reverse proxy, set
+`DJANGO_CSRF_TRUSTED_ORIGINS` to the public origin including the scheme.
 
 ```console
-# sudo service redis start
-cd backend
-python -m celery -A gretel.celery worker --loglevel=info -B
+cp docker/.env.example docker/.env
+uv run --no-project --python 3.13 python -c 'import secrets; print(secrets.token_urlsafe(50))'
+# Put the generated value in DJANGO_SECRET_KEY in docker/.env.
+docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-Running the application in [development mode][8] (hit ctrl-C to stop):
+Visit <http://localhost/> (or the configured hostname and `FRONTEND_PORT`).
+Production runs with Django debug mode disabled. The database, uploads, search
+cache and BaseX databases persist in Docker volumes. `docker compose down`
+retains them; adding `-v` deletes those volumes and their data.
+
+To use published images, set `REGISTRY` and `VERSION` in `docker/.env` if needed:
 
 ```console
-nvm use
-source .env/bin/activate
-yarn start
+docker compose -f docker/docker-compose.yml pull
+docker compose -f docker/docker-compose.yml up --no-build -d
 ```
 
-This will run the backend and frontend applications, as well as their unittests, and watch all source files for changes. You can visit the frontend on <http://localhost:8000/>, the browsable backend API on <http://localhost:8000/api/> and the backend admin on <http://localhost:8000/admin/>. On every change, unittests rerun, frontend code rebuilds and open browser tabs refresh automatically (livereload).
+The manually triggered **Publish container images** GitHub workflow publishes
+`gretel5-backend`, `gretel5-frontend` and `gretel5-basex` under
+`ghcr.io/<owner>/<repository>/`. It tags images by branch or release tag and
+commit; `latest` is updated only from the default branch. Compose uses that same
+image naming scheme. Local builds can set `BUILD_SHA` and `BUILD_SOURCE_URL`
+in `docker/.env` to display their revision in the frontend.
 
-[8]: #development-mode-vs-production-mode
+### Docker development
+
+```console
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up --build
+```
+
+Visit <http://localhost:4200/>. The development override runs Angular with live
+reload, Django's development server and debugpy. Attach to port 5678 for Django
+or 5679 for Celery using the included VS Code configurations. Development does
+not require a production secret key.
+
+The backend source is mounted from `backend/`; its SQLite database, uploads,
+cache and BaseX data stay there, separate from production volumes. Frontend
+dependencies have their own Docker volume and are refreshed with `npm ci` on
+startup. Stop one stack before starting the other; both use the same Compose project.
+Use both `-f` arguments when stopping the development stack as well.
 
 ### User registration and dataset uploads
 
-Uploading datasets requires a signed-in user. Existing users, including
-superusers, can upload public or private datasets. User registration is disabled
-by default and can be enabled with a backend environment variable:
+Uploading datasets requires a signed-in user. Registration is disabled by
+default. Set `REGISTRATION_ENABLED=true` in the backend environment, or in
+`docker/.env`, to enable it. Restart the backend after changing it; Compose
+recreates the affected containers on `up -d`. Public datasets remain searchable
+without signing in.
+
+Provision an initial administrator locally with:
 
 ```console
-REGISTRATION_ENABLED=false
+npm run django -- provision-superuser --username admin --email admin@example.org
 ```
 
-Set this variable to `true` to enable registration. Docker Compose passes it to
-the backend; put it in `docker/.env` or export it before starting Compose.
-Restart the backend process after changing it (recreate the backend container
-when using Docker). The frontend hides registration when disabled and asks
-visitors to sign in before uploading. The backend also enforces these
-restrictions on direct API requests. Public datasets remain searchable without
-signing in.
-
-To provision the initial superuser, activate the backend Python environment and
-run this command from the repository root:
+For a running Docker deployment:
 
 ```console
-yarn django provision-superuser --username admin --email admin@example.org
+docker compose -f docker/docker-compose.yml exec backend python manage.py provision-superuser --username admin --email admin@example.org
 ```
 
-For a running Docker deployment, use:
+The command prompts for a password and verifies the operator-provided email so
+the account can sign in while registration is closed. For noninteractive
+provisioning, pass `--noinput` and supply `DJANGO_SUPERUSER_PASSWORD`. Django's
+standard `createsuperuser` remains available but does not verify the email for
+frontend sign-in.
 
-```console
-docker exec -it gretel-backend python manage.py provision-superuser --username admin --email admin@example.org
-```
-
-The command prompts for a password and marks this operator-provided email as
-verified, so the account can sign in through the frontend while registration is
-closed. For noninteractive provisioning, pass `--noinput` and supply the password
-through `DJANGO_SUPERUSER_PASSWORD`. Django's standard `createsuperuser` command
-remains available, but does not mark the email as verified for frontend sign-in.
-
-Sign in using the frontend's **Login** menu, open **Upload** (`/upload-treebank`),
-enter the dataset details, select the input file, check **Public**, and submit.
-Celery indexes the dataset; it becomes visible to anonymous visitors after
-processing completes. BaseX, Celery, Redis, and Alpino (for unparsed input) must
-be running as described above.
-
-### Recommended order of development
-
-For each new feature, we suggested that you work through the steps listed below. This could be called a back-to-front or "bottom up" order. Of course, you may have reasons to choose otherwise. For example, if very precise specifications are provided, you could move step 8 to the front for a more test-driven approach.
-
-Steps 1–5 also include updating the unittests. Only functions should be tested, especially critical and nontrivial ones.
-
- 1. Backend model changes including migrations.
- 2. Backend serializer changes and backend admin changes.
- 3. Backend API endpoint changes.
- 4. Frontend model changes.
- 5. Other frontend unit changes (templates, views, routers, FSMs).
- 6. Frontend integration (globals, event bindings).
- 7. Run functional tests, repair broken functionality and broken tests.
- 8. [Add functional tests][9] for the new feature.
- 9. Update technical documentation.
-
-[9]: functional-tests/README.md#writing-tests
-
-For release branches, we suggest the following checklist.
-
- 1. Bump the version number in the `package.json` next to this README.
- 2. Run the functional tests in production mode, fix bugs if necessary.
- 3. Try using the application in production mode, look for problems that may have escaped the tests.
- 4. Add regression tests (unit or functional) that detect problems from step 3.
- 5. Work on the code until new regression tests from step 4 pass.
- 6. Optionally, repeat steps 2–5 with the application running in a real deployment setup (see [Deployment](#deployment)).
-
-### Commands for common tasks
-
-The `package.json` next to this README defines several shortcut commands to help streamline development. In total, there are over 30 commands. Most may be regarded as implementation details of other commands, although each command could be used directly. Below, we discuss the commands that are most likely to be useful to you. For full details, consult the `package.json`.
-
-Install the pinned versions of all package dependencies in all subprojects:
-
-```console
-yarn
-```
-
-Run backend and frontend in [production mode][8]:
-
-```console
-yarn start-p
-```
-
-Run the functional test suite:
-
-```console
-yarn test-func [FUNCTIONAL TEST OPTIONS]
-```
-
-The functional test suite by default assumes that you have the application running locally in production mode (i.e., on port `4200`). See [Configuring the browsers][10] and [Configuring the base address][11] in `functional-tests/README` for options.
-
-[10]: functional-tests/README.md#configuring-the-browsers
-[11]: functional-tests/README.md#configuring-the-base-address
-
-Run *all* tests (mostly useful for continuous integration):
-
-```console
-yarn test [FUNCTIONAL TEST OPTIONS]
-```
-
-Run an arbitrary command from within the root of a subproject:
-
-```console
-yarn back  [ARBITRARY BACKEND COMMAND HERE]
-yarn front [ARBITRARY FRONTEND COMMAND HERE]
-yarn func  [ARBITRARY FUNCTIONAL TESTS COMMAND HERE]
-```
-
-For example,
-
-```console
-yarn back less README.md
-```
-
-is equivalent to
-
-```console
-cd backend
-less README.md
-cd ..
-```
-
-Run `python manage.py` within the `backend` directory:
-
-```console
-yarn django [SUBCOMMAND] [OPTIONS]
-```
-
-`yarn django` is a shorthand for `yarn back python manage.py`. This command is useful for managing database migrations, among other things.
-
-Manage the frontend package dependencies:
-
-```console
-yarn fyarn (add|remove|upgrade|...) (PACKAGE ...) [OPTIONS]
-```
-
-### Notes on Python package dependencies
-
-Both the backend and the functional test suite are Python-based and package versions are pinned using [pip-tools][13] in both subprojects. For ease of development, you most likely want to use the same virtualenv for both and this is also what the `bootstrap.py` assumes.
-
-[13]: https://pypi.org/project/pip-tools/
-
-This comes with a small catch: the subprojects each have their own separate `requirements.txt`. If you run `pip-sync` in one subproject, the dependencies of the other will be uninstalled. In order to avoid this, you run `pip install -r requirements.txt` instead. The `yarn` command does this correctly by default.
-
-Another thing to be aware of, is that `pip-compile` takes the old contents of your `requirements.txt` into account when building the new version based on your `requirements.in`. You can use the following trick to keep the requirements in both projects aligned so the versions of common packages don't conflict:
-
-```console
-$ yarn back pip-compile
-# append contents of backend/requirements.txt to functional-tests/requirements.txt
-$ yarn func pip-compile
-```
-
-### Development mode vs production mode
-
-The purpose of development mode is to facilitate live development, as the name implies. The purpose of production mode is to simulate deployment conditions as closely as possible, in order to check whether everything still works under such conditions. A complete overview of the differences is given below.
-
-dimension  |  Development mode  |  Production mode
------------|--------------------|-----------------
-command  |  `yarn start`  |  `yarn start-p`
-base address  |  <http://localhost:8000>  |  <http://localhost:4200>
-backend server (Django)  |  in charge of everything  |  serves backend only
-frontend server (angular-cli)  |  serves  |  watch and build
-static files  |  served directly by Django's staticfiles app  |  collected by Django, served by gulp-connect
-backend `DEBUG` setting  |  `True`  |  `False`
-backend `ALLOWED_HOSTS`  |  -  |  restricted to `localhost`
-frontend sourcemaps  |  yes  |  no
-frontend optimization  |  no  |  yes
-
-## Deployment
-
-Both the backend and frontend applications have a section dedicated to deployment in their own READMEs. You should read these sections entirely before proceeding. All instructions in these sections still apply, though it is good to know that you can use the following shorthand commands from the integrated project root:
-
-```console
-
-# collect static files of both backend and frontend, with overridden settings
-$ yarn django collectstatic --settings SETTINGS --pythonpath path/to/SETTINGS.py
-```
-
-You should build the frontend before collecting all static files.
+Sign in through **Login**, open **Upload** (`/upload-treebank`), enter the dataset
+details, select the file, check **Public**, and submit. Celery processes the
+dataset; it becomes visible to anonymous visitors when processing completes.
+BaseX, Celery and Redis must be running, as must Alpino for unparsed input.
 
 ## Notes for users
 

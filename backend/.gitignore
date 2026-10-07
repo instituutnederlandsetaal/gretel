@@ -1,8 +1,3 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -13,10 +8,8 @@ pip-delete-this-directory.txt
 .cache
 coverage.xml
 *.cover
-.pytest_cache/
 
 # Django
-*.log
 local_settings.py
 db.sqlite3
 
@@ -24,18 +17,12 @@ db.sqlite3
 .python-version
 
 # Environments
-.env
-.venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 
-celerybeat-schedule*
-query_result_cache/*
-
 # Uploads, corpora, search cache
 basex-data/
-uploaded_treebanks/
 query_result_cache/

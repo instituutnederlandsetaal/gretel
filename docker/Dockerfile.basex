@@ -1,22 +1,15 @@
-# can't use alpine as it doesn't have bash, which we need to run the BaseX startup scripts.
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jre-jammy
 
-EXPOSE 1984
-VOLUME /data
-
-RUN apt-get update && apt-get install -y wget unzip
-
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget unzip \
+    && rm -rf /var/lib/apt/lists/*
+RUN wget -q https://files.basex.org/releases/10.6/BaseX106.zip \
+    && unzip -q BaseX106.zip -d / \
+    && rm BaseX106.zip \
+    && rm -rf /basex/data \
+    && ln -s /data /basex/data
 WORKDIR /basex
 
-RUN wget https://files.basex.org/releases/10.6/BaseX106.zip
-RUN unzip BaseX106.zip
-RUN rm BaseX106.zip
-RUN mv basex/* . && mv basex/.basexhome . && rmdir basex
-
-RUN rm -rf data
-RUN ln -s /data data
-
-# Create admin user password so network access is possible
-# TODO use environment variable for password?
-# TODO also allow non-admin users?
-CMD bin/basex -c "PASSWORD admin;EXIT;" && bin/basexserver
+EXPOSE 1984
+VOLUME ["/data"]
+CMD ["sh", "-c", "bin/basex -c 'PASSWORD admin;EXIT;' && exec bin/basexserver"]

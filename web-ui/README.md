@@ -1,27 +1,29 @@
-# WebUi
+# GrETEL frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.5.
+This is the Angular 15 frontend. Use the Node.js version in the repository's
+`.nvmrc` and npm. See the [root README](../README.md) for backend and Docker setup.
 
-## Development server
+From this directory:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+```console
+npm ci
+npm start
+```
 
-## Code scaffolding
+Visit <http://localhost:4200/>. The default proxy forwards API and authentication
+requests to the local backend on port 8000. `npm run serve:acc` and
+`npm run serve:live` use the acceptance and production backend proxies.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+`npm run build` produces the optimized frontend in `dist/` with asset URLs under
+`/static/`, for the Docker Nginx image. `npm test` runs tests in watch mode;
+`npm test -- --watch=false` runs once in headless Chrome. Set `CHROME_BIN` if Chrome is
+not in the usual location. `npm run lint` runs the existing Angular ESLint rules.
 
-## Build
+Build, serve and test commands generate the ignored `src/environments/version.ts`
+from the root package version and optional Git metadata. `BUILD_SHA` and
+`BUILD_SOURCE_URL` can supply the commit and repository URL in Docker or archive
+builds. The generator uses no third-party packages.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Use `npm run ng -- generate component NAME` for scaffolding and
+`npm run i18n` to extract translation messages. Localized build configurations
+are not defined; the removed locale commands referred to nonexistent targets.

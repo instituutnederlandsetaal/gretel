@@ -16,7 +16,10 @@ describe('TreebankSelectionService variants', () => {
             },
             variants: ['NL', 'VL'], componentGroups: undefined, metadata: [],
         });
-        const treebankService = { get: async () => treebank } as unknown as TreebankService;
+        const treebankService = {
+            get: async () => treebank,
+            getTreebanks: async () => ({ data: {}, providers: {} }),
+        } as unknown as TreebankService;
         const state = {
             selectedTreebanks: new TreebankSelection(treebankService),
             currentStep: { type: StepType.SelectTreebanks }, valid: false,

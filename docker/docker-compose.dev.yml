@@ -1,0 +1,40 @@
+# Use together with docker-compose.yml. Bind mounts keep development data separate.
+services:
+  frontend:
+    image: gretel5-frontend:dev
+    build:
+      target: frontend-dev
+    ports: !override
+      - "4200:4200"
+    volumes:
+      - ../web-ui:/app/web-ui
+      - ../package.json:/app/package.json:ro
+      - ../proxy.docker.json:/app/proxy.docker.json:ro
+      - gretel-frontend-node-modules:/app/web-ui/node_modules
+      - /app/web-ui/.angular
+
+  backend: &backend-dev
+    image: gretel5-backend:dev
+    build:
+      target: backend-dev
+    environment:
+      DATABASE_PATH: /app/backend/db.sqlite3
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    volumes: !override
+      - ../backend:/app/backend
+
+  celery:
+    <<: *backend-dev
+    ports:
+      - "5679:5679"
+    command: ["python", "-Xfrozen_modules=off", "-m", "debugpy", "--listen", "0.0.0.0:5679", "-m", "celery", "-A", "gretel.celery", "worker", "-l", "info", "-P", "solo", "-B"]
+
+  basex:
+    image: gretel5-basex:dev
+    volumes: !override
+      - ../backend/basex-data:/data
+
+volumes:
+  gretel-frontend-node-modules:

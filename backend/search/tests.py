@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.management import call_command
 from django.utils import timezone
@@ -51,6 +51,7 @@ def setUpModule():
         "upload-lassy",
         str(settings.BASE_DIR / "testdata" / "TEST_TROONREDE"),
         "--group-by=11",  # Create two components each consisting of two DBs
+        "--defaults",
     )
     global test_treebank
     test_treebank = Treebank.objects.get(slug="test_troonrede")
@@ -61,7 +62,8 @@ def setUpModule():
 
 def tearDownModule():
     if test_treebank is not None:
-        test_treebank.delete()
+        with override_settings(DELETE_COMPONENTS_FROM_BASEX=True):
+            test_treebank.delete()
         test_cache_dir.cleanup()
 
 
@@ -126,8 +128,8 @@ class BaseXSearchTestCase(TestCase):
 
     def test_parse_search_result(self):
         input_str = (
-            "<match>id||sentence||ids||begins||"
-            "xml_sentences||meta||vars||db</match><match>id2||sentence2"
+            "<match>id||sentence||sentence2||ids||begins||"
+            "xml_sentences||meta||vars||db</match><match>id2||sentence2||sentence2-extra"
             "||ids2||begins2"
             "||xml_sentences2||meta2||vars||db</match>"
         )

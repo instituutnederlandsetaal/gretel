@@ -1,0 +1,31 @@
+[project]
+name = "gretel"
+version = "5.1.4"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "Django>=5.2,<6",
+    "djangorestframework>=3.13.0",
+    "django-livereload-server",
+    "django-revproxy>=0.10.0",
+    "corpus2alpino>=0.3.10",
+    "BaseXClient",
+    "alpino-query>=2.1.10",
+    "celery[redis]>=5.2.0",
+    "mwe-query>=0.2.0a2",
+    "urllib3",
+    "gunicorn==23.0.0",
+    "elementpath",
+    "patool>=2.3.0",
+    "django-allauth>=64.0.0,<65",
+]
+
+[dependency-groups]
+dev = [
+    "debugpy==1.8.17",
+    "flake8",
+    "pytest",
+    "pytest-django",
+]
+
+[tool.uv]
+package = false

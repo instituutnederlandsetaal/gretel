@@ -7,8 +7,6 @@
         "outDir": "./dist/out-tsc",
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
-        "declaration": true,
-        "declarationMap": true,
         "inlineSources": true,
         "moduleResolution": "node",
         "experimentalDecorators": true,
@@ -23,12 +21,7 @@
         "lib": [
             "es2018",
             "dom"
-        ],
-        "paths": {
-            "@angular/": [
-                "./node_modules/@angular/"
-            ]
-        }
+        ]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

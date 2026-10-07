@@ -1,33 +1,29 @@
-.tscache
-*.log
-*~
-tmp/*
-log/*
-ng/
-.DS_Store
+# Local environments and deployment configuration
+.env
+.env.*
+.venv/
+!docker/.env.example
 
-prepros.cfg
-prepros-6.config
-config.php
-sitemap.xml
-robots.txt
-
-# Sass
+# Dependencies and generated assets
+node_modules/
+coverage/
+static/
 *.css.map
 .sass-cache/
 
-# NPM
-node_modules/
-
-.idea
-
-# Grunt output
-style/css/**
-js/min/**
-js/ts/**
-
-vendor
-!lassy-xpath/.gitignore
-uploaded_treebanks/
-
+# Python caches
 __pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Runtime files
+uploaded_treebanks/
+celerybeat-schedule*
+*.log
+tmp/
+log/
+
+# Editors and operating systems
+.idea/
+.DS_Store
+*~

@@ -1,38 +1,17 @@
-{
-    "/api": {
+[
+    {
+        "context": [
+            "/admin",
+            "/static",
+            "/mwe/",
+            "/parse/",
+            "/search/",
+            "/treebanks/",
+            "/upload/",
+            "/auth/",
+            "/_allauth/"
+        ],
         "target": "https://gretel5.hum.uu.nl",
-        "changeOrigin": true
-    },
-    "/admin": {
-        "target": "https://gretel5.hum.uu.nl",
-        "changeOrigin": true
-    },
-    "/static": {
-        "target": "https://gretel5.hum.uu.nl",
-        "changeOrigin": true
-    },
-    "/mwe/": {
-        "target": "https://gretel5.hum.uu.nl/",
-        "changeOrigin": true
-    },
-    "/parse/": {
-        "target": "https://gretel5.hum.uu.nl/",
-        "changeOrigin": true
-    },
-    "/search/": {
-        "target": "https://gretel5.hum.uu.nl/",
-        "changeOrigin": true
-    },
-    "/treebanks/": {
-        "target": "https://gretel5.hum.uu.nl/",
-        "changeOrigin": true
-    },
-    "/_allauth/": {
-        "target": "https://gretel5.hum.uu.nl/",
-        "changeOrigin": true
-    },
-    "/auth/": {
-        "target": "https://gretel5.hum.uu.nl/",
         "changeOrigin": true
     }
-}
+]
